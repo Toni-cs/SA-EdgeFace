@@ -1,0 +1,26 @@
+# Data
+datasets/
+*.zip
+
+# Weights and features
+weights/
+*.npy
+*.pth
+*.pt
+*.ckpt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Logs
+logs*.txt
+*.log
+
+# OS
+Thumbs.db
+.DS_Store
