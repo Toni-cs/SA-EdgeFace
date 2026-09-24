@@ -1,0 +1,13 @@
+device=cpu input_size=112 runs=100
+Config                  Params(M)   FLOPs(G)  Latency(ms)
+baseline                    1.778     0.0799        9.768
+sab_full                    2.090     0.0943       10.754
+sab_channel_only            1.778     0.0799        9.411
+sab_spatial_only            1.796     0.0808       10.103
+sab_detail_only             2.072     0.0933        9.900
+edgeface_x0_5               0.866     0.0228        8.557
+edgeface_x0_5_sab           0.930     0.0259       10.384
+x05_baseline                0.866     0.0228        8.336
+x05_sab_channel             0.866     0.0228        8.535
+x05_sab_spatial             0.874     0.0232        9.065
+x05_sab_full                0.930     0.0259       11.100

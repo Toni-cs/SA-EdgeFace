@@ -1,0 +1,20 @@
+评测结果
+
+=== baseline ===
+  LFW: Acc=61.12% AUC=0.6579 EER=38.97%
+
+=== +C1 channel ===
+  LFW: Acc=62.30% AUC=0.6655 EER=37.87%
+
+=== +C1 spatial ===
+  LFW: Acc=62.00% AUC=0.6591 EER=38.20%
+
+=== +C1 full SAB ===
+  LFW: Acc=61.32% AUC=0.6528 EER=38.87%
+
+=== +C1+C2 distill ===
+  LFW: Acc=61.73% AUC=0.6637 EER=38.57%
+
+=== +C1+C2+C3 aug ===
+  LFW: Acc=61.72% AUC=0.6535 EER=39.07%
+
