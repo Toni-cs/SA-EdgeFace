@@ -19,13 +19,14 @@ class ECAChannelAttention(nn.Module):
         super().__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.conv = nn.Conv1d(1, 1, kernel_size=k_size, padding=k_size // 2, bias=False)
+        self.bn = nn.BatchNorm1d(1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         y = self.avg_pool(x)
         y = y.squeeze(-1).transpose(-1, -2)
-        y = self.conv(y).transpose(-1, -2).unsqueeze(-1)
-        return x * self.sigmoid(y)
+        y = self.bn(self.conv(y)).transpose(-1, -2).unsqueeze(-1)
+        return x + x * self.sigmoid(y)
 
 
 class SpatialAttention(nn.Module):
@@ -36,11 +37,12 @@ class SpatialAttention(nn.Module):
         self.dwconv = nn.Conv2d(channels, channels, kernel_size=5, padding=2, groups=channels, bias=False)
         self.bn = nn.BatchNorm2d(channels)
         self.pwconv = nn.Conv2d(channels, 1, kernel_size=1, bias=False)
+        self.bn_out = nn.BatchNorm2d(1)
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
-        y = self.pwconv(self.bn(self.dwconv(x)))
-        return x * self.sigmoid(y)
+        y = self.bn_out(self.pwconv(self.bn(self.dwconv(x))))
+        return x + x * self.sigmoid(y)
 
 
 class LocalDetailEnhance(nn.Module):
@@ -74,7 +76,7 @@ class SurveillanceAttentionBlock(nn.Module):
     """
 
     def __init__(self, channels, use_channel=True, use_spatial=True,
-                 use_detail=True, alpha_init=0.1):
+                 use_detail=True, alpha_init=0.01):
         super().__init__()
         self.use_channel = use_channel
         self.use_spatial = use_spatial
@@ -86,7 +88,7 @@ class SurveillanceAttentionBlock(nn.Module):
             self.spatial_att = SpatialAttention(channels)
         if use_detail:
             self.detail = LocalDetailEnhance(channels)
-            self.alpha = nn.Parameter(torch.tensor(float(alpha_init)))
+            self.register_buffer('alpha', torch.tensor(float(alpha_init)))
 
     def forward(self, x):
         out = x
@@ -95,7 +97,8 @@ class SurveillanceAttentionBlock(nn.Module):
         if self.use_spatial:
             out = self.spatial_att(out)
         if self.use_detail:
-            out = out + self.alpha * self.detail(x)
+            alpha = torch.clamp(self.alpha, 0.0, 1.0)
+            out = out * (1.0 + alpha * torch.tanh(self.detail(x)))
         return out
 
 
@@ -108,5 +111,5 @@ def build_sab(channels, config=None):
         use_channel=config.get("use_channel", True),
         use_spatial=config.get("use_spatial", True),
         use_detail=config.get("use_detail", True),
-        alpha_init=config.get("alpha_init", 0.1),
+        alpha_init=config.get("alpha_init", 0.01),
     )

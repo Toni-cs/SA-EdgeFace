@@ -1,0 +1,767 @@
+﻿Device: cuda:0, CUDA: True
+
+============================================================
+[1/2] +C1 +C2 distill (model=x05_sab_full, cfg4)
+  w_feat=0.1, w_rel=0.0, aug=False, distill_start=20
+============================================================
+  dataset: 490623 imgs, 10572 ids, aug=False
+  [Teacher] loaded cache: (490623, 512) from weights/ablation_casia/teacher_feats.npy
+  [step 100] total=20.8190 loss_arc=20.8190
+  [step 200] total=19.9615 loss_arc=19.9615
+  [step 300] total=19.2621 loss_arc=19.2621
+  [step 400] total=18.9537 loss_arc=18.9537
+  [step 500] total=18.8456 loss_arc=18.8456
+  [step 600] total=18.7338 loss_arc=18.7338
+  [step 700] total=18.2574 loss_arc=18.2574
+  [step 800] total=18.2554 loss_arc=18.2554
+  [step 900] total=17.9045 loss_arc=17.9045
+  [step 1000] total=17.7490 loss_arc=17.7490
+  [step 1100] total=17.6757 loss_arc=17.6757
+  [step 1200] total=17.5429 loss_arc=17.5429
+  [step 1300] total=17.3890 loss_arc=17.3890
+  [step 1400] total=17.2433 loss_arc=17.2433
+  [step 1500] total=16.8086 loss_arc=16.8086
+  [step 1600] total=16.7048 loss_arc=16.7048
+  [step 1700] total=16.6028 loss_arc=16.6028
+  [step 1800] total=16.1972 loss_arc=16.1972
+  [step 1900] total=16.3495 loss_arc=16.3495
+[epoch 1/30] avg_loss=18.0845 lr=1.00e-01 time=190.1s
+  [step 2000] total=17.6649 loss_arc=17.6649
+  [step 2100] total=16.6965 loss_arc=16.6965
+  [step 2200] total=16.8416 loss_arc=16.8416
+  [step 2300] total=16.5157 loss_arc=16.5157
+  [step 2400] total=16.0527 loss_arc=16.0527
+  [step 2500] total=15.9902 loss_arc=15.9902
+  [step 2600] total=15.3255 loss_arc=15.3255
+  [step 2700] total=15.3677 loss_arc=15.3677
+  [step 2800] total=15.3385 loss_arc=15.3385
+  [step 2900] total=14.6430 loss_arc=14.6430
+  [step 3000] total=13.9953 loss_arc=13.9953
+  [step 3100] total=13.4381 loss_arc=13.4381
+  [step 3200] total=13.5338 loss_arc=13.5338
+  [step 3300] total=13.2140 loss_arc=13.2140
+  [step 3400] total=12.4345 loss_arc=12.4345
+  [step 3500] total=12.0571 loss_arc=12.0571
+  [step 3600] total=12.2242 loss_arc=12.2242
+  [step 3700] total=11.8977 loss_arc=11.8977
+  [step 3800] total=11.5373 loss_arc=11.5373
+[epoch 2/30] avg_loss=14.4324 lr=1.00e-01 time=167.6s
+  [step 3900] total=11.7049 loss_arc=11.7049
+  [step 4000] total=11.7758 loss_arc=11.7758
+  [step 4100] total=10.7344 loss_arc=10.7344
+  [step 4200] total=11.0756 loss_arc=11.0756
+  [step 4300] total=11.4339 loss_arc=11.4339
+  [step 4400] total=11.2007 loss_arc=11.2007
+  [step 4500] total=11.2707 loss_arc=11.2707
+  [step 4600] total=11.0657 loss_arc=11.0657
+  [step 4700] total=11.3218 loss_arc=11.3218
+  [step 4800] total=11.0127 loss_arc=11.0127
+  [step 4900] total=11.3587 loss_arc=11.3587
+  [step 5000] total=10.7009 loss_arc=10.7009
+  [step 5100] total=10.9974 loss_arc=10.9974
+  [step 5200] total=11.2020 loss_arc=11.2020
+  [step 5300] total=11.0168 loss_arc=11.0168
+  [step 5400] total=11.0769 loss_arc=11.0769
+  [step 5500] total=11.1199 loss_arc=11.1199
+  [step 5600] total=11.0022 loss_arc=11.0022
+  [step 5700] total=11.2637 loss_arc=11.2637
+[epoch 3/30] avg_loss=11.2229 lr=1.00e-01 time=167.8s
+  [step 5800] total=11.1460 loss_arc=11.1460
+  [step 5900] total=10.9297 loss_arc=10.9297
+  [step 6000] total=10.9645 loss_arc=10.9645
+  [step 6100] total=11.1936 loss_arc=11.1936
+  [step 6200] total=10.7712 loss_arc=10.7712
+  [step 6300] total=10.8894 loss_arc=10.8894
+  [step 6400] total=11.0517 loss_arc=11.0517
+  [step 6500] total=11.0249 loss_arc=11.0249
+  [step 6600] total=10.9285 loss_arc=10.9285
+  [step 6700] total=11.3621 loss_arc=11.3621
+  [step 6800] total=11.0665 loss_arc=11.0665
+  [step 6900] total=10.8719 loss_arc=10.8719
+  [step 7000] total=10.6471 loss_arc=10.6471
+  [step 7100] total=11.1138 loss_arc=11.1138
+  [step 7200] total=11.1905 loss_arc=11.1905
+  [step 7300] total=11.2434 loss_arc=11.2434
+  [step 7400] total=10.9734 loss_arc=10.9734
+  [step 7500] total=11.2559 loss_arc=11.2559
+  [step 7600] total=11.1232 loss_arc=11.1232
+[epoch 4/30] avg_loss=11.0772 lr=1.00e-01 time=176.4s
+  [step 7700] total=10.9723 loss_arc=10.9723
+  [step 7800] total=11.3979 loss_arc=11.3979
+  [step 7900] total=11.1443 loss_arc=11.1443
+  [step 8000] total=10.7872 loss_arc=10.7872
+  [step 8100] total=11.2429 loss_arc=11.2429
+  [step 8200] total=10.9993 loss_arc=10.9993
+  [step 8300] total=10.9505 loss_arc=10.9505
+  [step 8400] total=11.1142 loss_arc=11.1142
+  [step 8500] total=10.9576 loss_arc=10.9576
+  [step 8600] total=10.8308 loss_arc=10.8308
+  [step 8700] total=10.9312 loss_arc=10.9312
+  [step 8800] total=10.9235 loss_arc=10.9235
+  [step 8900] total=11.2777 loss_arc=11.2777
+  [step 9000] total=11.0022 loss_arc=11.0022
+  [step 9100] total=11.2392 loss_arc=11.2392
+  [step 9200] total=11.1881 loss_arc=11.1881
+  [step 9300] total=11.3470 loss_arc=11.3470
+  [step 9400] total=10.8871 loss_arc=10.8871
+  [step 9500] total=10.8419 loss_arc=10.8419
+[epoch 5/30] avg_loss=11.0364 lr=1.00e-01 time=185.6s
+  [step 9600] total=10.7822 loss_arc=10.7822
+  [step 9700] total=10.9166 loss_arc=10.9166
+  [step 9800] total=11.0153 loss_arc=11.0153
+  [step 9900] total=11.1178 loss_arc=11.1178
+  [step 10000] total=11.1536 loss_arc=11.1536
+  [step 10100] total=10.9102 loss_arc=10.9102
+  [step 10200] total=11.0025 loss_arc=11.0025
+  [step 10300] total=10.7692 loss_arc=10.7692
+  [step 10400] total=11.2775 loss_arc=11.2775
+  [step 10500] total=10.6939 loss_arc=10.6939
+  [step 10600] total=11.1161 loss_arc=11.1161
+  [step 10700] total=11.1729 loss_arc=11.1729
+  [step 10800] total=10.8726 loss_arc=10.8726
+  [step 10900] total=10.8959 loss_arc=10.8959
+  [step 11000] total=11.0857 loss_arc=11.0857
+  [step 11100] total=10.6956 loss_arc=10.6956
+  [step 11200] total=10.9003 loss_arc=10.9003
+  [step 11300] total=11.0547 loss_arc=11.0547
+  [step 11400] total=11.2214 loss_arc=11.2214
+[epoch 6/30] avg_loss=10.9918 lr=1.00e-01 time=183.2s
+  [step 11500] total=10.9597 loss_arc=10.9597
+  [step 11600] total=10.7672 loss_arc=10.7672
+  [step 11700] total=11.2338 loss_arc=11.2338
+  [step 11800] total=10.8519 loss_arc=10.8519
+  [step 11900] total=10.9031 loss_arc=10.9031
+  [step 12000] total=11.0553 loss_arc=11.0553
+  [step 12100] total=10.8846 loss_arc=10.8846
+  [step 12200] total=11.3394 loss_arc=11.3394
+  [step 12300] total=10.7894 loss_arc=10.7894
+  [step 12400] total=11.0051 loss_arc=11.0051
+  [step 12500] total=10.9638 loss_arc=10.9638
+  [step 12600] total=11.1302 loss_arc=11.1302
+  [step 12700] total=10.7168 loss_arc=10.7168
+  [step 12800] total=11.0433 loss_arc=11.0433
+  [step 12900] total=10.7962 loss_arc=10.7962
+  [step 13000] total=10.5826 loss_arc=10.5826
+  [step 13100] total=10.9264 loss_arc=10.9264
+  [step 13200] total=10.8709 loss_arc=10.8709
+  [step 13300] total=10.7078 loss_arc=10.7078
+  [step 13400] total=10.9700 loss_arc=10.9700
+[epoch 7/30] avg_loss=10.9474 lr=1.00e-01 time=184.4s
+  [step 13500] total=11.1020 loss_arc=11.1020
+  [step 13600] total=10.7217 loss_arc=10.7217
+  [step 13700] total=10.8660 loss_arc=10.8660
+  [step 13800] total=11.1548 loss_arc=11.1548
+  [step 13900] total=10.8637 loss_arc=10.8637
+  [step 14000] total=10.8177 loss_arc=10.8177
+  [step 14100] total=10.6178 loss_arc=10.6178
+  [step 14200] total=10.5520 loss_arc=10.5520
+  [step 14300] total=11.1321 loss_arc=11.1321
+  [step 14400] total=10.6879 loss_arc=10.6879
+  [step 14500] total=10.7189 loss_arc=10.7189
+  [step 14600] total=10.6136 loss_arc=10.6136
+  [step 14700] total=10.9416 loss_arc=10.9416
+  [step 14800] total=11.1231 loss_arc=11.1231
+  [step 14900] total=10.8315 loss_arc=10.8315
+  [step 15000] total=11.0468 loss_arc=11.0468
+  [step 15100] total=10.9858 loss_arc=10.9858
+  [step 15200] total=10.8166 loss_arc=10.8166
+  [step 15300] total=11.0374 loss_arc=11.0374
+[epoch 8/30] avg_loss=10.9050 lr=1.00e-01 time=162.8s
+  [step 15400] total=10.6057 loss_arc=10.6057
+  [step 15500] total=10.8099 loss_arc=10.8099
+  [step 15600] total=11.1119 loss_arc=11.1119
+  [step 15700] total=10.6373 loss_arc=10.6373
+  [step 15800] total=11.2310 loss_arc=11.2310
+  [step 15900] total=11.2844 loss_arc=11.2844
+  [step 16000] total=10.9391 loss_arc=10.9391
+  [step 16100] total=11.2576 loss_arc=11.2576
+  [step 16200] total=11.2111 loss_arc=11.2111
+  [step 16300] total=10.5990 loss_arc=10.5990
+  [step 16400] total=10.4733 loss_arc=10.4733
+  [step 16500] total=10.8808 loss_arc=10.8808
+  [step 16600] total=10.9672 loss_arc=10.9672
+  [step 16700] total=10.6628 loss_arc=10.6628
+  [step 16800] total=10.5957 loss_arc=10.5957
+  [step 16900] total=10.7645 loss_arc=10.7645
+  [step 17000] total=11.1788 loss_arc=11.1788
+  [step 17100] total=10.8409 loss_arc=10.8409
+  [step 17200] total=10.7882 loss_arc=10.7882
+[epoch 9/30] avg_loss=10.8675 lr=1.00e-01 time=165.7s
+  [step 17300] total=11.0237 loss_arc=11.0237
+  [step 17400] total=11.1406 loss_arc=11.1406
+  [step 17500] total=10.7708 loss_arc=10.7708
+  [step 17600] total=10.8490 loss_arc=10.8490
+  [step 17700] total=10.6879 loss_arc=10.6879
+  [step 17800] total=10.7454 loss_arc=10.7454
+  [step 17900] total=10.5732 loss_arc=10.5732
+  [step 18000] total=10.7974 loss_arc=10.7974
+  [step 18100] total=10.6313 loss_arc=10.6313
+  [step 18200] total=10.8888 loss_arc=10.8888
+  [step 18300] total=10.9570 loss_arc=10.9570
+  [step 18400] total=10.4166 loss_arc=10.4166
+  [step 18500] total=10.7800 loss_arc=10.7800
+  [step 18600] total=10.6011 loss_arc=10.6011
+  [step 18700] total=10.7612 loss_arc=10.7612
+  [step 18800] total=10.9376 loss_arc=10.9376
+  [step 18900] total=10.8684 loss_arc=10.8684
+  [step 19000] total=10.5797 loss_arc=10.5797
+  [step 19100] total=11.1313 loss_arc=11.1313
+[epoch 10/30] avg_loss=10.8312 lr=1.00e-01 time=163.7s
+  [step 19200] total=10.5729 loss_arc=10.5729
+  [step 19300] total=10.6692 loss_arc=10.6692
+  [step 19400] total=10.6964 loss_arc=10.6964
+  [step 19500] total=11.0973 loss_arc=11.0973
+  [step 19600] total=10.6728 loss_arc=10.6728
+  [step 19700] total=10.6788 loss_arc=10.6788
+  [step 19800] total=10.5586 loss_arc=10.5586
+  [step 19900] total=10.5132 loss_arc=10.5132
+  [step 20000] total=10.9407 loss_arc=10.9407
+  [step 20100] total=10.8959 loss_arc=10.8959
+  [step 20200] total=11.2619 loss_arc=11.2619
+  [step 20300] total=10.8675 loss_arc=10.8675
+  [step 20400] total=11.0998 loss_arc=11.0998
+  [step 20500] total=10.9106 loss_arc=10.9106
+  [step 20600] total=10.7716 loss_arc=10.7716
+  [step 20700] total=10.4210 loss_arc=10.4210
+  [step 20800] total=10.7622 loss_arc=10.7622
+  [step 20900] total=10.5540 loss_arc=10.5540
+  [step 21000] total=10.6318 loss_arc=10.6318
+[epoch 11/30] avg_loss=10.7939 lr=1.00e-01 time=166.2s
+  [step 21100] total=10.4110 loss_arc=10.4110
+  [step 21200] total=10.5142 loss_arc=10.5142
+  [step 21300] total=10.8074 loss_arc=10.8074
+  [step 21400] total=11.2235 loss_arc=11.2235
+  [step 21500] total=10.8522 loss_arc=10.8522
+  [step 21600] total=10.3661 loss_arc=10.3661
+  [step 21700] total=10.8059 loss_arc=10.8059
+  [step 21800] total=11.0222 loss_arc=11.0222
+  [step 21900] total=10.9863 loss_arc=10.9863
+  [step 22000] total=10.6210 loss_arc=10.6210
+  [step 22100] total=10.4375 loss_arc=10.4375
+  [step 22200] total=10.8046 loss_arc=10.8046
+  [step 22300] total=10.6914 loss_arc=10.6914
+  [step 22400] total=10.6118 loss_arc=10.6118
+  [step 22500] total=10.7986 loss_arc=10.7986
+  [step 22600] total=10.6918 loss_arc=10.6918
+  [step 22700] total=11.3703 loss_arc=11.3703
+  [step 22800] total=10.7484 loss_arc=10.7484
+  [step 22900] total=10.7802 loss_arc=10.7802
+[epoch 12/30] avg_loss=10.7556 lr=1.00e-01 time=164.6s
+  [step 23000] total=10.2172 loss_arc=10.2172
+  [step 23100] total=10.6586 loss_arc=10.6586
+  [step 23200] total=10.4467 loss_arc=10.4467
+  [step 23300] total=10.9360 loss_arc=10.9360
+  [step 23400] total=10.5780 loss_arc=10.5780
+  [step 23500] total=11.0412 loss_arc=11.0412
+  [step 23600] total=10.6848 loss_arc=10.6848
+  [step 23700] total=10.7030 loss_arc=10.7030
+  [step 23800] total=10.8939 loss_arc=10.8939
+  [step 23900] total=10.7121 loss_arc=10.7121
+  [step 24000] total=10.6198 loss_arc=10.6198
+  [step 24100] total=10.7436 loss_arc=10.7436
+  [step 24200] total=10.8709 loss_arc=10.8709
+  [step 24300] total=10.3995 loss_arc=10.3995
+  [step 24400] total=10.7353 loss_arc=10.7353
+  [step 24500] total=10.7021 loss_arc=10.7021
+  [step 24600] total=10.7177 loss_arc=10.7177
+  [step 24700] total=10.5663 loss_arc=10.5663
+  [step 24800] total=10.6907 loss_arc=10.6907
+  [step 24900] total=10.4663 loss_arc=10.4663
+[epoch 13/30] avg_loss=10.7178 lr=1.00e-01 time=164.8s
+  [step 25000] total=10.3960 loss_arc=10.3960
+  [step 25100] total=10.3759 loss_arc=10.3759
+  [step 25200] total=10.8817 loss_arc=10.8817
+  [step 25300] total=10.5872 loss_arc=10.5872
+  [step 25400] total=10.4909 loss_arc=10.4909
+  [step 25500] total=10.8914 loss_arc=10.8914
+  [step 25600] total=10.7974 loss_arc=10.7974
+  [step 25700] total=10.6745 loss_arc=10.6745
+  [step 25800] total=10.8172 loss_arc=10.8172
+  [step 25900] total=10.3894 loss_arc=10.3894
+  [step 26000] total=10.6918 loss_arc=10.6918
+  [step 26100] total=10.6191 loss_arc=10.6191
+  [step 26200] total=10.6010 loss_arc=10.6010
+  [step 26300] total=10.5477 loss_arc=10.5477
+  [step 26400] total=10.6810 loss_arc=10.6810
+  [step 26500] total=10.5620 loss_arc=10.5620
+  [step 26600] total=10.8248 loss_arc=10.8248
+  [step 26700] total=10.8912 loss_arc=10.8912
+  [step 26800] total=10.5241 loss_arc=10.5241
+[epoch 14/30] avg_loss=10.6772 lr=1.00e-01 time=164.0s
+  [step 26900] total=10.4792 loss_arc=10.4792
+  [step 27000] total=10.5024 loss_arc=10.5024
+  [step 27100] total=10.5268 loss_arc=10.5268
+  [step 27200] total=10.8783 loss_arc=10.8783
+  [step 27300] total=10.9115 loss_arc=10.9115
+  [step 27400] total=10.7929 loss_arc=10.7929
+  [step 27500] total=10.8443 loss_arc=10.8443
+  [step 27600] total=10.2758 loss_arc=10.2758
+  [step 27700] total=10.4448 loss_arc=10.4448
+  [step 27800] total=10.4060 loss_arc=10.4060
+  [step 27900] total=11.2845 loss_arc=11.2845
+  [step 28000] total=10.4477 loss_arc=10.4477
+  [step 28100] total=10.4824 loss_arc=10.4824
+  [step 28200] total=10.6058 loss_arc=10.6058
+  [step 28300] total=10.7163 loss_arc=10.7163
+  [step 28400] total=10.3490 loss_arc=10.3490
+  [step 28500] total=10.9086 loss_arc=10.9086
+  [step 28600] total=11.2202 loss_arc=11.2202
+  [step 28700] total=10.4566 loss_arc=10.4566
+[epoch 15/30] avg_loss=10.6391 lr=1.00e-01 time=163.2s
+  [step 28800] total=10.5840 loss_arc=10.5840
+  [step 28900] total=10.3878 loss_arc=10.3878
+  [step 29000] total=10.5175 loss_arc=10.5175
+  [step 29100] total=10.9216 loss_arc=10.9216
+  [step 29200] total=10.7688 loss_arc=10.7688
+  [step 29300] total=10.9031 loss_arc=10.9031
+  [step 29400] total=10.7111 loss_arc=10.7111
+  [step 29500] total=10.8934 loss_arc=10.8934
+  [step 29600] total=10.6780 loss_arc=10.6780
+  [step 29700] total=10.3940 loss_arc=10.3940
+  [step 29800] total=10.6290 loss_arc=10.6290
+  [step 29900] total=10.7514 loss_arc=10.7514
+  [step 30000] total=10.9251 loss_arc=10.9251
+  [step 30100] total=10.3720 loss_arc=10.3720
+  [step 30200] total=10.5340 loss_arc=10.5340
+  [step 30300] total=10.6057 loss_arc=10.6057
+  [step 30400] total=10.3291 loss_arc=10.3291
+  [step 30500] total=10.6415 loss_arc=10.6415
+  [step 30600] total=10.4904 loss_arc=10.4904
+[epoch 16/30] avg_loss=10.6010 lr=1.00e-01 time=167.6s
+  [step 30700] total=10.1373 loss_arc=10.1373
+  [step 30800] total=10.4915 loss_arc=10.4915
+  [step 30900] total=10.4568 loss_arc=10.4568
+  [step 31000] total=10.3171 loss_arc=10.3171
+  [step 31100] total=10.4660 loss_arc=10.4660
+  [step 31200] total=10.4137 loss_arc=10.4137
+  [step 31300] total=10.6756 loss_arc=10.6756
+  [step 31400] total=10.7184 loss_arc=10.7184
+  [step 31500] total=10.6883 loss_arc=10.6883
+  [step 31600] total=10.8296 loss_arc=10.8296
+  [step 31700] total=10.6053 loss_arc=10.6053
+  [step 31800] total=10.6127 loss_arc=10.6127
+  [step 31900] total=10.7325 loss_arc=10.7325
+  [step 32000] total=10.4057 loss_arc=10.4057
+  [step 32100] total=10.8687 loss_arc=10.8687
+  [step 32200] total=10.1805 loss_arc=10.1805
+  [step 32300] total=10.5917 loss_arc=10.5917
+  [step 32400] total=10.4937 loss_arc=10.4937
+  [step 32500] total=10.4314 loss_arc=10.4314
+[epoch 17/30] avg_loss=10.5639 lr=1.00e-01 time=163.0s
+  [step 32600] total=10.3158 loss_arc=10.3158
+  [step 32700] total=11.0180 loss_arc=11.0180
+  [step 32800] total=10.1419 loss_arc=10.1419
+  [step 32900] total=10.5424 loss_arc=10.5424
+  [step 33000] total=10.5183 loss_arc=10.5183
+  [step 33100] total=10.8286 loss_arc=10.8286
+  [step 33200] total=10.4373 loss_arc=10.4373
+  [step 33300] total=10.9649 loss_arc=10.9649
+  [step 33400] total=10.4057 loss_arc=10.4057
+  [step 33500] total=10.3575 loss_arc=10.3575
+  [step 33600] total=10.1320 loss_arc=10.1320
+  [step 33700] total=10.5694 loss_arc=10.5694
+  [step 33800] total=10.4525 loss_arc=10.4525
+  [step 33900] total=10.4749 loss_arc=10.4749
+  [step 34000] total=10.6909 loss_arc=10.6909
+  [step 34100] total=10.2485 loss_arc=10.2485
+  [step 34200] total=10.8120 loss_arc=10.8120
+  [step 34300] total=10.5818 loss_arc=10.5818
+  [step 34400] total=10.2427 loss_arc=10.2427
+[epoch 18/30] avg_loss=10.5326 lr=1.00e-01 time=166.1s
+  [step 34500] total=10.0824 loss_arc=10.0824
+  [step 34600] total=9.9838 loss_arc=9.9838
+  [step 34700] total=10.4182 loss_arc=10.4182
+  [step 34800] total=9.9863 loss_arc=9.9863
+  [step 34900] total=10.8160 loss_arc=10.8160
+  [step 35000] total=10.9017 loss_arc=10.9017
+  [step 35100] total=10.5768 loss_arc=10.5768
+  [step 35200] total=10.6196 loss_arc=10.6196
+  [step 35300] total=10.7606 loss_arc=10.7606
+  [step 35400] total=10.6699 loss_arc=10.6699
+  [step 35500] total=10.3189 loss_arc=10.3189
+  [step 35600] total=10.2298 loss_arc=10.2298
+  [step 35700] total=10.4328 loss_arc=10.4328
+  [step 35800] total=10.6161 loss_arc=10.6161
+  [step 35900] total=10.5539 loss_arc=10.5539
+  [step 36000] total=10.7056 loss_arc=10.7056
+  [step 36100] total=10.6150 loss_arc=10.6150
+  [step 36200] total=10.9119 loss_arc=10.9119
+  [step 36300] total=10.5467 loss_arc=10.5467
+  [step 36400] total=10.4086 loss_arc=10.4086
+[epoch 19/30] avg_loss=10.4852 lr=1.00e-01 time=160.6s
+  [step 36500] total=9.9981 loss_arc=9.9981
+  [step 36600] total=10.1874 loss_arc=10.1874
+  [step 36700] total=10.8827 loss_arc=10.8827
+  [step 36800] total=10.4851 loss_arc=10.4851
+  [step 36900] total=10.5726 loss_arc=10.5726
+  [step 37000] total=10.8677 loss_arc=10.8677
+  [step 37100] total=10.2872 loss_arc=10.2872
+  [step 37200] total=10.1625 loss_arc=10.1625
+  [step 37300] total=10.5357 loss_arc=10.5357
+  [step 37400] total=10.4214 loss_arc=10.4214
+  [step 37500] total=9.8693 loss_arc=9.8693
+  [step 37600] total=10.3312 loss_arc=10.3312
+  [step 37700] total=10.2046 loss_arc=10.2046
+  [step 37800] total=10.5509 loss_arc=10.5509
+  [step 37900] total=10.5783 loss_arc=10.5783
+  [step 38000] total=10.2924 loss_arc=10.2924
+  [step 38100] total=10.3924 loss_arc=10.3924
+  [step 38200] total=10.5429 loss_arc=10.5429
+  [step 38300] total=10.0547 loss_arc=10.0547
+[epoch 20/30] avg_loss=10.4466 lr=1.00e-02 time=166.3s
+  [step 38400] total=9.2439 loss_arc=9.1437 loss_feat=1.0019
+  [step 38500] total=9.0473 loss_arc=8.9475 loss_feat=0.9981
+  [step 38600] total=9.0727 loss_arc=8.9734 loss_feat=0.9928
+  [step 38700] total=9.1090 loss_arc=9.0091 loss_feat=0.9989
+  [step 38800] total=9.3499 loss_arc=9.2502 loss_feat=0.9969
+  [step 38900] total=9.1718 loss_arc=9.0717 loss_feat=1.0005
+  [step 39000] total=9.3831 loss_arc=9.2833 loss_feat=0.9987
+  [step 39100] total=8.6318 loss_arc=8.5323 loss_feat=0.9950
+  [step 39200] total=8.8178 loss_arc=8.7179 loss_feat=0.9988
+  [step 39300] total=8.4442 loss_arc=8.3444 loss_feat=0.9988
+  [step 39400] total=8.3404 loss_arc=8.2406 loss_feat=0.9980
+  [step 39500] total=8.7601 loss_arc=8.6602 loss_feat=0.9994
+  [step 39600] total=8.5709 loss_arc=8.4711 loss_feat=0.9974
+  [step 39700] total=8.7541 loss_arc=8.6545 loss_feat=0.9964
+  [step 39800] total=8.9794 loss_arc=8.8795 loss_feat=0.9990
+  [step 39900] total=8.6039 loss_arc=8.5045 loss_feat=0.9944
+  [step 40000] total=9.0351 loss_arc=8.9361 loss_feat=0.9902
+  [step 40100] total=8.7178 loss_arc=8.6179 loss_feat=0.9992
+  [step 40200] total=8.7271 loss_arc=8.6276 loss_feat=0.9950
+[epoch 21/30] avg_loss=8.8863 lr=1.00e-02 time=173.0s
+  [step 40300] total=8.5194 loss_arc=8.4195 loss_feat=0.9984
+  [step 40400] total=8.2649 loss_arc=8.1647 loss_feat=1.0023
+  [step 40500] total=8.7269 loss_arc=8.6276 loss_feat=0.9926
+  [step 40600] total=8.6161 loss_arc=8.5163 loss_feat=0.9985
+  [step 40700] total=8.3001 loss_arc=8.2001 loss_feat=0.9997
+  [step 40800] total=8.8455 loss_arc=8.7462 loss_feat=0.9934
+  [step 40900] total=8.2991 loss_arc=8.1993 loss_feat=0.9981
+  [step 41000] total=8.6218 loss_arc=8.5222 loss_feat=0.9960
+  [step 41100] total=8.7682 loss_arc=8.6691 loss_feat=0.9912
+  [step 41200] total=8.5915 loss_arc=8.4921 loss_feat=0.9937
+  [step 41300] total=8.0590 loss_arc=7.9593 loss_feat=0.9973
+  [step 41400] total=8.3111 loss_arc=8.2117 loss_feat=0.9938
+  [step 41500] total=8.8360 loss_arc=8.7358 loss_feat=1.0028
+  [step 41600] total=8.5032 loss_arc=8.4040 loss_feat=0.9927
+  [step 41700] total=8.1670 loss_arc=8.0672 loss_feat=0.9985
+  [step 41800] total=8.3780 loss_arc=8.2781 loss_feat=0.9991
+  [step 41900] total=8.6202 loss_arc=8.5205 loss_feat=0.9970
+  [step 42000] total=8.8442 loss_arc=8.7449 loss_feat=0.9921
+  [step 42100] total=7.6795 loss_arc=7.5799 loss_feat=0.9955
+[epoch 22/30] avg_loss=8.3883 lr=1.00e-02 time=184.0s
+  [step 42200] total=8.2833 loss_arc=8.1834 loss_feat=0.9990
+  [step 42300] total=8.3281 loss_arc=8.2284 loss_feat=0.9968
+  [step 42400] total=7.5756 loss_arc=7.4756 loss_feat=1.0003
+  [step 42500] total=8.0900 loss_arc=7.9903 loss_feat=0.9969
+  [step 42600] total=8.1260 loss_arc=8.0263 loss_feat=0.9975
+  [step 42700] total=7.9816 loss_arc=7.8816 loss_feat=1.0003
+  [step 42800] total=8.7611 loss_arc=8.6619 loss_feat=0.9921
+  [step 42900] total=8.5136 loss_arc=8.4141 loss_feat=0.9946
+  [step 43000] total=8.3611 loss_arc=8.2614 loss_feat=0.9973
+  [step 43100] total=8.9762 loss_arc=8.8767 loss_feat=0.9950
+  [step 43200] total=8.6439 loss_arc=8.5442 loss_feat=0.9972
+  [step 43300] total=8.4057 loss_arc=8.3067 loss_feat=0.9903
+  [step 43400] total=7.7054 loss_arc=7.6058 loss_feat=0.9959
+  [step 43500] total=8.1915 loss_arc=8.0921 loss_feat=0.9943
+  [step 43600] total=7.7970 loss_arc=7.6976 loss_feat=0.9940
+  [step 43700] total=8.6183 loss_arc=8.5187 loss_feat=0.9964
+  [step 43800] total=8.1400 loss_arc=8.0407 loss_feat=0.9923
+  [step 43900] total=8.7141 loss_arc=8.6146 loss_feat=0.9953
+  [step 44000] total=8.6257 loss_arc=8.5263 loss_feat=0.9938
+[epoch 23/30] avg_loss=8.2675 lr=1.00e-02 time=164.6s
+  [step 44100] total=8.3085 loss_arc=8.2089 loss_feat=0.9964
+  [step 44200] total=7.2304 loss_arc=7.1308 loss_feat=0.9966
+  [step 44300] total=8.4192 loss_arc=8.3196 loss_feat=0.9955
+  [step 44400] total=7.8700 loss_arc=7.7710 loss_feat=0.9894
+  [step 44500] total=8.1511 loss_arc=8.0520 loss_feat=0.9905
+  [step 44600] total=8.3820 loss_arc=8.2821 loss_feat=0.9989
+  [step 44700] total=7.9013 loss_arc=7.8018 loss_feat=0.9950
+  [step 44800] total=8.0719 loss_arc=7.9721 loss_feat=0.9982
+  [step 44900] total=7.8023 loss_arc=7.7026 loss_feat=0.9979
+  [step 45000] total=7.8904 loss_arc=7.7910 loss_feat=0.9943
+  [step 45100] total=8.2348 loss_arc=8.1354 loss_feat=0.9940
+  [step 45200] total=8.1414 loss_arc=8.0423 loss_feat=0.9913
+  [step 45300] total=7.7055 loss_arc=7.6063 loss_feat=0.9921
+  [step 45400] total=7.9503 loss_arc=7.8505 loss_feat=0.9974
+  [step 45500] total=8.6725 loss_arc=8.5728 loss_feat=0.9971
+  [step 45600] total=8.3080 loss_arc=8.2084 loss_feat=0.9963
+  [step 45700] total=7.7450 loss_arc=7.6462 loss_feat=0.9881
+  [step 45800] total=8.4598 loss_arc=8.3602 loss_feat=0.9960
+  [step 45900] total=8.3158 loss_arc=8.2164 loss_feat=0.9942
+[epoch 24/30] avg_loss=8.2275 lr=1.00e-02 time=166.5s
+  [step 46000] total=7.6723 loss_arc=7.5731 loss_feat=0.9921
+  [step 46100] total=7.7907 loss_arc=7.6917 loss_feat=0.9901
+  [step 46200] total=8.0627 loss_arc=7.9629 loss_feat=0.9978
+  [step 46300] total=8.1090 loss_arc=8.0097 loss_feat=0.9930
+  [step 46400] total=8.3632 loss_arc=8.2637 loss_feat=0.9946
+  [step 46500] total=8.7482 loss_arc=8.6486 loss_feat=0.9962
+  [step 46600] total=8.5820 loss_arc=8.4825 loss_feat=0.9949
+  [step 46700] total=8.1548 loss_arc=8.0553 loss_feat=0.9950
+  [step 46800] total=7.8852 loss_arc=7.7857 loss_feat=0.9945
+  [step 46900] total=8.0919 loss_arc=7.9921 loss_feat=0.9980
+  [step 47000] total=8.0665 loss_arc=7.9670 loss_feat=0.9944
+  [step 47100] total=7.6954 loss_arc=7.5959 loss_feat=0.9950
+  [step 47200] total=8.4873 loss_arc=8.3878 loss_feat=0.9941
+  [step 47300] total=8.4120 loss_arc=8.3124 loss_feat=0.9963
+  [step 47400] total=8.2691 loss_arc=8.1701 loss_feat=0.9898
+  [step 47500] total=8.4041 loss_arc=8.3048 loss_feat=0.9927
+  [step 47600] total=8.3331 loss_arc=8.2333 loss_feat=0.9980
+  [step 47700] total=7.9975 loss_arc=7.8987 loss_feat=0.9875
+  [step 47800] total=8.3199 loss_arc=8.2210 loss_feat=0.9889
+  [step 47900] total=8.1026 loss_arc=8.0034 loss_feat=0.9917
+[epoch 25/30] avg_loss=8.2093 lr=1.00e-03 time=165.3s
+  [step 48000] total=7.6028 loss_arc=7.5037 loss_feat=0.9914
+  [step 48100] total=8.1445 loss_arc=8.0456 loss_feat=0.9886
+  [step 48200] total=7.6713 loss_arc=7.5723 loss_feat=0.9904
+  [step 48300] total=7.7342 loss_arc=7.6350 loss_feat=0.9923
+  [step 48400] total=7.5348 loss_arc=7.4360 loss_feat=0.9885
+  [step 48500] total=7.4304 loss_arc=7.3314 loss_feat=0.9905
+  [step 48600] total=7.6036 loss_arc=7.5042 loss_feat=0.9937
+  [step 48700] total=7.1977 loss_arc=7.0985 loss_feat=0.9924
+  [step 48800] total=7.5874 loss_arc=7.4883 loss_feat=0.9913
+  [step 48900] total=7.2631 loss_arc=7.1639 loss_feat=0.9918
+  [step 49000] total=7.5744 loss_arc=7.4758 loss_feat=0.9860
+  [step 49100] total=7.4034 loss_arc=7.3042 loss_feat=0.9929
+  [step 49200] total=7.6921 loss_arc=7.5930 loss_feat=0.9913
+  [step 49300] total=7.9725 loss_arc=7.8733 loss_feat=0.9921
+  [step 49400] total=7.2632 loss_arc=7.1639 loss_feat=0.9936
+  [step 49500] total=7.3524 loss_arc=7.2531 loss_feat=0.9921
+  [step 49600] total=7.7099 loss_arc=7.6107 loss_feat=0.9911
+  [step 49700] total=6.6462 loss_arc=6.5471 loss_feat=0.9920
+  [step 49800] total=7.1094 loss_arc=7.0101 loss_feat=0.9934
+[epoch 26/30] avg_loss=7.5632 lr=1.00e-03 time=166.5s
+  [step 49900] total=7.3780 loss_arc=7.2790 loss_feat=0.9898
+  [step 50000] total=7.3184 loss_arc=7.2195 loss_feat=0.9891
+  [step 50100] total=7.1157 loss_arc=7.0168 loss_feat=0.9884
+  [step 50200] total=7.2043 loss_arc=7.1055 loss_feat=0.9884
+  [step 50300] total=7.4259 loss_arc=7.3267 loss_feat=0.9920
+  [step 50400] total=7.8773 loss_arc=7.7780 loss_feat=0.9933
+  [step 50500] total=7.6631 loss_arc=7.5639 loss_feat=0.9926
+  [step 50600] total=7.4503 loss_arc=7.3510 loss_feat=0.9923
+  [step 50700] total=7.4875 loss_arc=7.3882 loss_feat=0.9930
+  [step 50800] total=7.7724 loss_arc=7.6732 loss_feat=0.9922
+  [step 50900] total=7.0310 loss_arc=6.9318 loss_feat=0.9920
+  [step 51000] total=8.0297 loss_arc=7.9308 loss_feat=0.9888
+  [step 51100] total=7.1379 loss_arc=7.0387 loss_feat=0.9910
+  [step 51200] total=7.2462 loss_arc=7.1468 loss_feat=0.9939
+  [step 51300] total=7.6347 loss_arc=7.5358 loss_feat=0.9891
+  [step 51400] total=7.2797 loss_arc=7.1807 loss_feat=0.9897
+  [step 51500] total=7.6750 loss_arc=7.5763 loss_feat=0.9863
+  [step 51600] total=8.1678 loss_arc=8.0690 loss_feat=0.9877
+  [step 51700] total=7.2524 loss_arc=7.1534 loss_feat=0.9902
+[epoch 27/30] avg_loss=7.4377 lr=1.00e-03 time=163.9s
+  [step 51800] total=7.2056 loss_arc=7.1063 loss_feat=0.9929
+  [step 51900] total=7.4160 loss_arc=7.3172 loss_feat=0.9887
+  [step 52000] total=7.4877 loss_arc=7.3889 loss_feat=0.9881
+  [step 52100] total=7.4126 loss_arc=7.3132 loss_feat=0.9942
+  [step 52200] total=7.5107 loss_arc=7.4115 loss_feat=0.9914
+  [step 52300] total=7.8584 loss_arc=7.7593 loss_feat=0.9910
+  [step 52400] total=7.5213 loss_arc=7.4222 loss_feat=0.9902
+  [step 52500] total=7.1555 loss_arc=7.0561 loss_feat=0.9944
+  [step 52600] total=7.3259 loss_arc=7.2266 loss_feat=0.9923
+  [step 52700] total=7.3808 loss_arc=7.2815 loss_feat=0.9928
+  [step 52800] total=7.5933 loss_arc=7.4944 loss_feat=0.9888
+  [step 52900] total=7.5228 loss_arc=7.4237 loss_feat=0.9914
+  [step 53000] total=7.9648 loss_arc=7.8662 loss_feat=0.9866
+  [step 53100] total=6.8830 loss_arc=6.7840 loss_feat=0.9906
+  [step 53200] total=7.6095 loss_arc=7.5102 loss_feat=0.9935
+  [step 53300] total=8.3265 loss_arc=8.2275 loss_feat=0.9907
+  [step 53400] total=7.0796 loss_arc=6.9809 loss_feat=0.9865
+  [step 53500] total=7.2744 loss_arc=7.1752 loss_feat=0.9922
+  [step 53600] total=7.5209 loss_arc=7.4218 loss_feat=0.9915
+[epoch 28/30] avg_loss=7.3797 lr=1.00e-03 time=164.6s
+  [step 53700] total=7.4434 loss_arc=7.3442 loss_feat=0.9924
+  [step 53800] total=7.3504 loss_arc=7.2514 loss_feat=0.9900
+  [step 53900] total=7.6079 loss_arc=7.5086 loss_feat=0.9932
+  [step 54000] total=7.3484 loss_arc=7.2488 loss_feat=0.9963
+  [step 54100] total=7.2230 loss_arc=7.1242 loss_feat=0.9886
+  [step 54200] total=7.2133 loss_arc=7.1143 loss_feat=0.9898
+  [step 54300] total=6.8491 loss_arc=6.7499 loss_feat=0.9914
+  [step 54400] total=7.6609 loss_arc=7.5615 loss_feat=0.9943
+  [step 54500] total=7.6297 loss_arc=7.5297 loss_feat=1.0002
+  [step 54600] total=7.0820 loss_arc=6.9832 loss_feat=0.9879
+  [step 54700] total=7.6031 loss_arc=7.5038 loss_feat=0.9927
+  [step 54800] total=7.1994 loss_arc=7.1002 loss_feat=0.9920
+  [step 54900] total=7.7280 loss_arc=7.6291 loss_feat=0.9887
+  [step 55000] total=7.5413 loss_arc=7.4422 loss_feat=0.9910
+  [step 55100] total=7.1901 loss_arc=7.0913 loss_feat=0.9883
+  [step 55200] total=7.7419 loss_arc=7.6427 loss_feat=0.9920
+  [step 55300] total=7.0943 loss_arc=6.9952 loss_feat=0.9913
+  [step 55400] total=7.1548 loss_arc=7.0555 loss_feat=0.9938
+  [step 55500] total=8.5175 loss_arc=8.4187 loss_feat=0.9875
+[epoch 29/30] avg_loss=7.3376 lr=1.00e-03 time=165.6s
+  [step 55600] total=7.0558 loss_arc=6.9564 loss_feat=0.9934
+  [step 55700] total=7.2557 loss_arc=7.1568 loss_feat=0.9896
+  [step 55800] total=7.3547 loss_arc=7.2555 loss_feat=0.9924
+  [step 55900] total=7.1838 loss_arc=7.0850 loss_feat=0.9881
+  [step 56000] total=7.1007 loss_arc=7.0011 loss_feat=0.9959
+  [step 56100] total=7.0850 loss_arc=6.9854 loss_feat=0.9950
+  [step 56200] total=7.1134 loss_arc=7.0140 loss_feat=0.9941
+  [step 56300] total=7.2662 loss_arc=7.1670 loss_feat=0.9918
+  [step 56400] total=6.6584 loss_arc=6.5592 loss_feat=0.9919
+  [step 56500] total=7.3005 loss_arc=7.2015 loss_feat=0.9893
+  [step 56600] total=7.1567 loss_arc=7.0575 loss_feat=0.9918
+  [step 56700] total=6.9537 loss_arc=6.8549 loss_feat=0.9876
+  [step 56800] total=7.7043 loss_arc=7.6051 loss_feat=0.9912
+  [step 56900] total=7.1606 loss_arc=7.0614 loss_feat=0.9923
+  [step 57000] total=7.0326 loss_arc=6.9339 loss_feat=0.9873
+  [step 57100] total=6.9220 loss_arc=6.8230 loss_feat=0.9901
+  [step 57200] total=6.7561 loss_arc=6.6568 loss_feat=0.9931
+  [step 57300] total=7.7937 loss_arc=7.6949 loss_feat=0.9880
+  [step 57400] total=7.4705 loss_arc=7.3712 loss_feat=0.9936
+[epoch 30/30] avg_loss=7.3019 lr=1.00e-03 time=165.5s
+[done] final model saved to weights/ablation_casia/cfg4_final.pt
+
+  RESULT: AUC=0.9607 Acc=89.99% Sep=0.4340 (5372s)
+
+============================================================
+[2/2] +C1 +C2 +C3 aug (model=x05_sab_full, cfg5)
+  w_feat=0.1, w_rel=0.0, aug=True, distill_start=20
+============================================================
+  dataset: 490623 imgs, 10572 ids, aug=True
+  [step 100] total=20.6902 loss_arc=20.6902
+  [step 200] total=20.0229 loss_arc=20.0229
+  [step 300] total=19.7370 loss_arc=19.7370
+  [step 400] total=19.4711 loss_arc=19.4711
+  [step 500] total=19.0593 loss_arc=19.0593
+  [step 600] total=18.8438 loss_arc=18.8438
+  [step 700] total=18.7201 loss_arc=18.7201
+  [step 800] total=18.2176 loss_arc=18.2176
+  [step 900] total=17.8971 loss_arc=17.8971
+  [step 1000] total=17.9670 loss_arc=17.9670
+  [step 1100] total=17.8011 loss_arc=17.8011
+  [step 1200] total=17.3441 loss_arc=17.3441
+  [step 1300] total=17.4570 loss_arc=17.4570
+  [step 1400] total=16.7381 loss_arc=16.7381
+  [step 1500] total=16.8781 loss_arc=16.8781
+  [step 1600] total=16.7288 loss_arc=16.7288
+  [step 1700] total=16.5071 loss_arc=16.5071
+  [step 1800] total=16.7884 loss_arc=16.7884
+  [step 1900] total=16.2760 loss_arc=16.2760
+[epoch 1/30] avg_loss=18.2122 lr=1.00e-01 time=246.6s
+  [step 2000] total=17.3451 loss_arc=17.3451
+  [step 2100] total=16.9134 loss_arc=16.9134
+  [step 2200] total=16.8951 loss_arc=16.8951
+  [step 2300] total=16.2654 loss_arc=16.2654
+  [step 2400] total=15.9936 loss_arc=15.9936
+  [step 2500] total=15.8470 loss_arc=15.8470
+  [step 2600] total=15.4523 loss_arc=15.4523
+  [step 2700] total=14.4928 loss_arc=14.4928
+  [step 2800] total=13.4901 loss_arc=13.4901
+  [step 2900] total=12.4831 loss_arc=12.4831
+  [step 3000] total=11.2580 loss_arc=11.2580
+  [step 3100] total=10.8627 loss_arc=10.8627
+  [step 3200] total=11.0239 loss_arc=11.0239
+  [step 3300] total=10.9955 loss_arc=10.9955
+  [step 3400] total=11.0381 loss_arc=11.0381
+  [step 3500] total=11.1353 loss_arc=11.1353
+  [step 3600] total=10.9679 loss_arc=10.9679
+  [step 3700] total=11.1607 loss_arc=11.1607
+  [step 3800] total=11.0433 loss_arc=11.0433
+[epoch 2/30] avg_loss=13.5041 lr=1.00e-01 time=241.6s
+  [step 3900] total=11.1450 loss_arc=11.1450
+  [step 4000] total=11.1430 loss_arc=11.1430
+  [step 4100] total=11.0479 loss_arc=11.0479
+  [step 4200] total=10.9973 loss_arc=10.9973
+  [step 4300] total=11.0568 loss_arc=11.0568
+  [step 4400] total=11.0598 loss_arc=11.0598
+  [step 4500] total=11.1989 loss_arc=11.1989
+  [step 4600] total=11.1268 loss_arc=11.1268
+  [step 4700] total=11.0627 loss_arc=11.0627
+  [step 4800] total=11.0461 loss_arc=11.0461
+  [step 4900] total=11.2148 loss_arc=11.2148
+  [step 5000] total=11.1385 loss_arc=11.1385
+  [step 5100] total=11.0977 loss_arc=11.0977
+  [step 5200] total=11.1422 loss_arc=11.1422
+  [step 5300] total=11.1800 loss_arc=11.1800
+  [step 5400] total=11.1887 loss_arc=11.1887
+  [step 5500] total=11.0822 loss_arc=11.0822
+  [step 5600] total=11.2054 loss_arc=11.2054
+  [step 5700] total=11.1981 loss_arc=11.1981
+[epoch 3/30] avg_loss=11.1328 lr=1.00e-01 time=242.1s
+  [step 5800] total=11.1277 loss_arc=11.1277
+  [step 5900] total=11.3034 loss_arc=11.3034
+  [step 6000] total=11.0635 loss_arc=11.0635
+  [step 6100] total=10.9290 loss_arc=10.9290
+  [step 6200] total=10.9182 loss_arc=10.9182
+  [step 6300] total=10.9505 loss_arc=10.9505
+  [step 6400] total=10.9019 loss_arc=10.9019
+  [step 6500] total=10.9894 loss_arc=10.9894
+  [step 6600] total=11.2290 loss_arc=11.2290
+  [step 6700] total=10.9006 loss_arc=10.9006
+  [step 6800] total=10.9431 loss_arc=10.9431
+  [step 6900] total=12.4825 loss_arc=12.4825
+  [step 7000] total=12.5605 loss_arc=12.5605
+  [step 7100] total=12.4375 loss_arc=12.4375
+  [step 7200] total=12.4448 loss_arc=12.4448
+  [step 7300] total=12.4634 loss_arc=12.4634
+  [step 7400] total=12.3033 loss_arc=12.3033
+  [step 7500] total=12.6143 loss_arc=12.6143
+  [step 7600] total=12.4517 loss_arc=12.4517
+[epoch 4/30] avg_loss=11.5800 lr=1.00e-01 time=240.8s
+  [step 7700] total=12.4839 loss_arc=12.4839
+  [step 7800] total=12.4500 loss_arc=12.4500
+  [step 7900] total=12.3050 loss_arc=12.3050
+  [step 8000] total=12.5101 loss_arc=12.5101
+  [step 8100] total=12.4350 loss_arc=12.4350
+  [step 8200] total=12.4786 loss_arc=12.4786
+  [step 8300] total=12.5472 loss_arc=12.5472
+  [step 8400] total=12.5119 loss_arc=12.5119
+  [step 8500] total=12.5052 loss_arc=12.5052
+  [step 8600] total=12.3536 loss_arc=12.3536
+  [step 8700] total=12.3704 loss_arc=12.3704
+  [step 8800] total=12.4270 loss_arc=12.4270
+  [step 8900] total=12.5084 loss_arc=12.5084
+  [step 9000] total=12.4709 loss_arc=12.4709
+  [step 9100] total=12.6662 loss_arc=12.6662
+  [step 9200] total=12.3390 loss_arc=12.3390
+  [step 9300] total=12.6381 loss_arc=12.6381
+  [step 9400] total=12.3541 loss_arc=12.3541
+  [step 9500] total=12.4044 loss_arc=12.4044
+[epoch 5/30] avg_loss=12.4593 lr=1.00e-01 time=240.5s
+  [step 9600] total=12.4583 loss_arc=12.4583
+  [step 9700] total=12.3430 loss_arc=12.3430
+  [step 9800] total=12.4184 loss_arc=12.4184
+  [step 9900] total=12.4997 loss_arc=12.4997
+  [step 10000] total=12.4386 loss_arc=12.4386
+  [step 10100] total=12.4204 loss_arc=12.4204
+  [step 10200] total=12.2696 loss_arc=12.2696
+  [step 10300] total=12.3352 loss_arc=12.3352
+  [step 10400] total=12.4048 loss_arc=12.4048
+  [step 10500] total=12.5452 loss_arc=12.5452
+  [step 10600] total=12.3955 loss_arc=12.3955
+  [step 10700] total=12.4767 loss_arc=12.4767
+  [step 10800] total=12.5749 loss_arc=12.5749
+  [step 10900] total=12.5560 loss_arc=12.5560
+  [step 11000] total=12.5536 loss_arc=12.5536
+  [step 11100] total=12.4670 loss_arc=12.4670
+  [step 11200] total=12.3628 loss_arc=12.3628
+  [step 11300] total=12.5174 loss_arc=12.5174
+  [step 11400] total=12.5248 loss_arc=12.5248
+[epoch 6/30] avg_loss=12.4593 lr=1.00e-01 time=240.7s
+  [step 11500] total=12.4297 loss_arc=12.4297
+  [step 11600] total=12.4972 loss_arc=12.4972
+  [step 11700] total=12.5698 loss_arc=12.5698
+  [step 11800] total=12.4740 loss_arc=12.4740
+  [step 11900] total=12.3586 loss_arc=12.3586
+  [step 12000] total=12.6020 loss_arc=12.6020
+  [step 12100] total=12.5070 loss_arc=12.5070
+  [step 12200] total=12.5700 loss_arc=12.5700
+  [step 12300] total=12.2812 loss_arc=12.2812
+  [step 12400] total=12.3854 loss_arc=12.3854
+  [step 12500] total=12.3390 loss_arc=12.3390
+  [step 12600] total=12.4618 loss_arc=12.4618
+  [step 12700] total=12.3005 loss_arc=12.3005
+  [WARN] NaN/Inf loss at step 12773, skipping
+  [WARN] NaN/Inf loss at step 12774, skipping
+  [WARN] NaN/Inf loss at step 12775, skipping
+[epoch 7/30] avg_loss=12.4572 lr=1.00e-01 time=270.0s nan_skipped=639
+[epoch 8/30] avg_loss=0.0000 lr=1.00e-01 time=255.3s nan_skipped=2555
+[epoch 9/30] avg_loss=0.0000 lr=1.00e-01 time=237.3s nan_skipped=4471
+[epoch 10/30] avg_loss=0.0000 lr=1.00e-01 time=235.9s nan_skipped=6387
+[epoch 11/30] avg_loss=0.0000 lr=1.00e-01 time=235.9s nan_skipped=8303
+[epoch 12/30] avg_loss=0.0000 lr=1.00e-01 time=235.1s nan_skipped=10219
+[epoch 13/30] avg_loss=0.0000 lr=1.00e-01 time=235.8s nan_skipped=12135
+[epoch 14/30] avg_loss=0.0000 lr=1.00e-01 time=235.7s nan_skipped=14051
+[epoch 15/30] avg_loss=0.0000 lr=1.00e-01 time=235.6s nan_skipped=15967
+[epoch 16/30] avg_loss=0.0000 lr=1.00e-01 time=235.0s nan_skipped=17883

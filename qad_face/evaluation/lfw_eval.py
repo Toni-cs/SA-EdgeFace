@@ -42,6 +42,13 @@ def evaluate_lfw(features, pairs, is_same_list):
     """
     给定特征和标签，计算 LFW 指标。
 
+    使用标准 LFW 10-fold 交叉验证协议：
+    - 6000 对分 10 折（每折 300 same + 300 diff）
+    - 每折：在其余 9 折上搜最优阈值，在本折上评测
+    - accuracy = 10 折均值
+
+    AUC/EER/TAR@FAR 在全量 6000 对上计算（阈值无关指标）。
+
     Args:
         features: np.array, shape (N, 512), 所有人脸的特征（按 pairs 顺序，每对两个特征）
         pairs: list, 从 load_pairs 返回
@@ -55,29 +62,69 @@ def evaluate_lfw(features, pairs, is_same_list):
     for i in range(len(pairs)):
         feat1 = features[2 * i]
         feat2 = features[2 * i + 1]
-        # 余弦相似度
         sim = np.dot(feat1, feat2) / (np.linalg.norm(feat1) * np.linalg.norm(feat2) + 1e-8)
         similarities.append(sim)
         labels.append(1 if is_same_list[i] else 0)
 
     similarities = np.array(similarities)
     labels = np.array(labels)
+    n_pairs = len(pairs)
 
-    # ROC 曲线
+    # ROC 曲线 (全量，阈值无关)
     fpr, tpr, thresholds = roc_curve(labels, similarities)
     roc_auc = auc(fpr, tpr)
 
-    # 准确率（最优阈值）
-    best_acc = 0
-    best_thresh = 0
+    # 10-fold 交叉验证 accuracy (标准 LFW 协议)
+    n_same = int(np.sum(labels))
+    n_diff = n_pairs - n_same
+    fold_size_same = n_same // 10
+    fold_size_diff = n_diff // 10
+
+    same_indices = np.where(labels == 1)[0]
+    diff_indices = np.where(labels == 0)[0]
+
+    fold_accs = []
+    fold_thresholds = []
+    for fold in range(10):
+        test_same = same_indices[fold * fold_size_same:(fold + 1) * fold_size_same]
+        test_diff = diff_indices[fold * fold_size_diff:(fold + 1) * fold_size_diff]
+        test_idx = np.concatenate([test_same, test_diff])
+        val_idx = np.setdiff1d(np.arange(n_pairs), test_idx)
+
+        val_sims = similarities[val_idx]
+        val_labels = labels[val_idx]
+        test_sims = similarities[test_idx]
+        test_labels = labels[test_idx]
+
+        val_fpr, val_tpr, val_thresh = roc_curve(val_labels, val_sims)
+        best_acc_val = 0
+        best_t = 0.0
+        for t in val_thresh:
+            pred = (val_sims >= t).astype(int)
+            acc = np.mean(pred == val_labels)
+            if acc > best_acc_val:
+                best_acc_val = acc
+                best_t = t
+
+        pred_test = (test_sims >= best_t).astype(int)
+        fold_acc = np.mean(pred_test == test_labels)
+        fold_accs.append(fold_acc)
+        fold_thresholds.append(best_t)
+
+    cv_accuracy = np.mean(fold_accs)
+    cv_std = np.std(fold_accs)
+
+    # Oracle accuracy (全量搜阈值，仅作参考，不作为报告值)
+    best_acc_oracle = 0
+    best_thresh_oracle = 0
     for thresh in thresholds:
         pred = (similarities >= thresh).astype(int)
         acc = np.mean(pred == labels)
-        if acc > best_acc:
-            best_acc = acc
-            best_thresh = thresh
+        if acc > best_acc_oracle:
+            best_acc_oracle = acc
+            best_thresh_oracle = thresh
 
-    # TAR@FAR
+    # TAR@FAR (全量 ROC)
     tar_at_far = {}
     for far_target in [1e-3, 1e-4, 1e-6]:
         idx = np.searchsorted(fpr, far_target)
@@ -92,14 +139,16 @@ def evaluate_lfw(features, pairs, is_same_list):
     eer = (fpr[eer_idx] + fnr[eer_idx]) / 2
 
     return {
-        "accuracy": best_acc,
-        "best_threshold": best_thresh,
+        "accuracy": cv_accuracy,
+        "accuracy_std": cv_std,
+        "accuracy_oracle": best_acc_oracle,
+        "best_threshold": np.mean(fold_thresholds),
         "auc": roc_auc,
         "eer": eer,
         **tar_at_far,
-        "num_pairs": len(pairs),
-        "num_same": int(np.sum(labels)),
-        "num_diff": int(np.sum(1 - labels)),
+        "num_pairs": n_pairs,
+        "num_same": n_same,
+        "num_diff": n_diff,
     }
 
 
@@ -111,7 +160,8 @@ def print_results(results, model_name="Model"):
     print(f"  Total pairs:    {results['num_pairs']}")
     print(f"  Same pairs:     {results['num_same']}")
     print(f"  Diff pairs:     {results['num_diff']}")
-    print(f"  Accuracy:       {results['accuracy']*100:.2f}%")
+    print(f"  Accuracy (10-fold CV): {results['accuracy']*100:.2f}% +/- {results.get('accuracy_std',0)*100:.2f}%")
+    print(f"  Accuracy (oracle):     {results.get('accuracy_oracle',0)*100:.2f}%  [参考，非报告值]")
     print(f"  AUC:            {results['auc']:.4f}")
     print(f"  EER:            {results['eer']*100:.2f}%")
     print(f"  Best threshold: {results['best_threshold']:.4f}")

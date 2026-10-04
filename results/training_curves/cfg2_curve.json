@@ -1,0 +1,219 @@
+{
+  "config_id": "cfg2",
+  "config_name": "+spatial",
+  "description": "+C1 spatial",
+  "model_key": "x05_sab_spatial",
+  "source_file": "logs_cfg1-5_v3.txt",
+  "epochs": [
+    {
+      "epoch": 1,
+      "total_epochs": 30,
+      "avg_loss": 17.9996,
+      "lr": 0.1,
+      "time_s": 225.6
+    },
+    {
+      "epoch": 2,
+      "total_epochs": 30,
+      "avg_loss": 14.2498,
+      "lr": 0.1,
+      "time_s": 217.2
+    },
+    {
+      "epoch": 3,
+      "total_epochs": 30,
+      "avg_loss": 11.177,
+      "lr": 0.1,
+      "time_s": 218.4
+    },
+    {
+      "epoch": 4,
+      "total_epochs": 30,
+      "avg_loss": 11.0851,
+      "lr": 0.1,
+      "time_s": 216.4
+    },
+    {
+      "epoch": 5,
+      "total_epochs": 30,
+      "avg_loss": 11.035,
+      "lr": 0.1,
+      "time_s": 216.8
+    },
+    {
+      "epoch": 6,
+      "total_epochs": 30,
+      "avg_loss": 10.9935,
+      "lr": 0.1,
+      "time_s": 217.2
+    },
+    {
+      "epoch": 7,
+      "total_epochs": 30,
+      "avg_loss": 10.9462,
+      "lr": 0.1,
+      "time_s": 216.8
+    },
+    {
+      "epoch": 8,
+      "total_epochs": 30,
+      "avg_loss": 10.9154,
+      "lr": 0.1,
+      "time_s": 215.9
+    },
+    {
+      "epoch": 9,
+      "total_epochs": 30,
+      "avg_loss": 10.8866,
+      "lr": 0.1,
+      "time_s": 217.4
+    },
+    {
+      "epoch": 10,
+      "total_epochs": 30,
+      "avg_loss": 10.8631,
+      "lr": 0.1,
+      "time_s": 216.0
+    },
+    {
+      "epoch": 11,
+      "total_epochs": 30,
+      "avg_loss": 10.8321,
+      "lr": 0.1,
+      "time_s": 217.4
+    },
+    {
+      "epoch": 12,
+      "total_epochs": 30,
+      "avg_loss": 10.7962,
+      "lr": 0.1,
+      "time_s": 218.1
+    },
+    {
+      "epoch": 13,
+      "total_epochs": 30,
+      "avg_loss": 10.7633,
+      "lr": 0.1,
+      "time_s": 224.3
+    },
+    {
+      "epoch": 14,
+      "total_epochs": 30,
+      "avg_loss": 10.7313,
+      "lr": 0.1,
+      "time_s": 221.6
+    },
+    {
+      "epoch": 15,
+      "total_epochs": 30,
+      "avg_loss": 10.702,
+      "lr": 0.1,
+      "time_s": 219.1
+    },
+    {
+      "epoch": 16,
+      "total_epochs": 30,
+      "avg_loss": 10.669,
+      "lr": 0.1,
+      "time_s": 217.2
+    },
+    {
+      "epoch": 17,
+      "total_epochs": 30,
+      "avg_loss": 10.6399,
+      "lr": 0.1,
+      "time_s": 215.8
+    },
+    {
+      "epoch": 18,
+      "total_epochs": 30,
+      "avg_loss": 10.6152,
+      "lr": 0.1,
+      "time_s": 216.6
+    },
+    {
+      "epoch": 19,
+      "total_epochs": 30,
+      "avg_loss": 10.5926,
+      "lr": 0.1,
+      "time_s": 215.1
+    },
+    {
+      "epoch": 20,
+      "total_epochs": 30,
+      "avg_loss": 10.5601,
+      "lr": 0.01,
+      "time_s": 218.3
+    },
+    {
+      "epoch": 21,
+      "total_epochs": 30,
+      "avg_loss": 9.0268,
+      "lr": 0.01,
+      "time_s": 214.8
+    },
+    {
+      "epoch": 22,
+      "total_epochs": 30,
+      "avg_loss": 8.5452,
+      "lr": 0.01,
+      "time_s": 217.1
+    },
+    {
+      "epoch": 23,
+      "total_epochs": 30,
+      "avg_loss": 8.425,
+      "lr": 0.01,
+      "time_s": 215.5
+    },
+    {
+      "epoch": 24,
+      "total_epochs": 30,
+      "avg_loss": 8.3772,
+      "lr": 0.01,
+      "time_s": 216.7
+    },
+    {
+      "epoch": 25,
+      "total_epochs": 30,
+      "avg_loss": 8.3584,
+      "lr": 0.001,
+      "time_s": 216.7
+    },
+    {
+      "epoch": 26,
+      "total_epochs": 30,
+      "avg_loss": 7.7444,
+      "lr": 0.001,
+      "time_s": 216.4
+    },
+    {
+      "epoch": 27,
+      "total_epochs": 30,
+      "avg_loss": 7.6196,
+      "lr": 0.001,
+      "time_s": 216.1
+    },
+    {
+      "epoch": 28,
+      "total_epochs": 30,
+      "avg_loss": 7.5627,
+      "lr": 0.001,
+      "time_s": 216.3
+    },
+    {
+      "epoch": 29,
+      "total_epochs": 30,
+      "avg_loss": 7.5186,
+      "lr": 0.001,
+      "time_s": 218.8
+    },
+    {
+      "epoch": 30,
+      "total_epochs": 30,
+      "avg_loss": 7.4843,
+      "lr": 0.001,
+      "time_s": 221.2
+    }
+  ]
+}

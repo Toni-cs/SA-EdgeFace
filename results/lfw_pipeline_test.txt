@@ -1,5 +1,0 @@
-评测结果
-
-=== edgeface_x0_5_sab ===
-  LFW: Acc=50.00% AUC=0.4160 EER=56.00%
-
