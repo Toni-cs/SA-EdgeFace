@@ -21,6 +21,9 @@ venv/
 logs_multiseed/
 *.log
 
+# Paper (不公开)
+paper/
+
 # OS
 Thumbs.db
 .DS_Store
