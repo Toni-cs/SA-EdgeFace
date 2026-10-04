@@ -30,23 +30,23 @@ from sklearn.metrics import roc_auc_score
 
 
 ABLATION_CONFIGS = [
-    ("x05_baseline",          {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False}, "baseline (ShuffleNetV2 x0.5)"),
-    ("x05_sab_channel",       {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False}, "+C1 channel (ECA)"),
-    ("x05_sab_spatial",       {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False}, "+C1 spatial"),
-    ("x05_sab_full",          {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False}, "+C1 full SAB"),
-    ("x05_sab_full",          {"w_feat": 0.1, "w_rel": 0.0, "use_aug": False}, "+C1 +C2 distill"),
-    ("x05_sab_full",          {"w_feat": 0.1, "w_rel": 0.0, "use_aug": True},  "+C1 +C2 +C3 aug"),
+    ("x05_baseline",          {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False, "distill_start": 0},  "baseline (ShuffleNetV2 x0.5)"),
+    ("x05_sab_channel",       {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False, "distill_start": 0},  "+C1 channel (ECA)"),
+    ("x05_sab_spatial",       {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False, "distill_start": 0},  "+C1 spatial"),
+    ("x05_sab_full",          {"w_feat": 0.0, "w_rel": 0.0, "use_aug": False, "distill_start": 0},  "+C1 full SAB"),
+    ("x05_sab_full",          {"w_feat": 0.1, "w_rel": 0.0, "use_aug": False, "distill_start": 20}, "+C1 +C2 distill"),
+    ("x05_sab_full",          {"w_feat": 0.1, "w_rel": 0.0, "use_aug": True,  "distill_start": 20}, "+C1 +C2 +C3 aug"),
 ]
 
 
 class AugFaceDataset(torch.utils.data.Dataset):
     """人脸分类数据集，可选 C3 监控退化增强。"""
-    def __init__(self, root, use_aug=False, aug_prob=0.5):
+    def __init__(self, root, use_aug=False, aug_prob=0.3, severity="light"):
         self.images = []
         self.labels = []
         self.use_aug = use_aug
         self.aug_prob = aug_prob
-        self.augmentor = SurveillanceAugment() if use_aug else None
+        self.augmentor = SurveillanceAugment(severity=severity) if use_aug else None
         import glob
         id_dirs = sorted([d for d in os.listdir(root) if os.path.isdir(os.path.join(root, d))])
         label = 0
@@ -55,9 +55,6 @@ class AugFaceDataset(torch.utils.data.Dataset):
             if len(imgs) < 2:
                 continue
             for p in imgs:
-                img = imread_cn(p)
-                if img is None:
-                    continue
                 self.images.append(p)
                 self.labels.append(label)
             label += 1
@@ -160,27 +157,30 @@ def main():
     parser.add_argument("--configs", nargs="*", default=None, help="只跑指定配置（索引 0-5）")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--resume", default=None, help="从 checkpoint 恢复（路径）")
-    parser.add_argument("--grad_clip", type=float, default=0.0, help="梯度范数裁剪上限 (0=不裁剪)")
+    parser.add_argument("--grad_clip", type=float, default=10.0, help="梯度范数裁剪上限 (0=不裁剪)")
     parser.add_argument("--warmup_epochs", type=int, default=2, help="warmup epoch 数")
     parser.add_argument("--optimizer", default="sgd", choices=["sgd", "adamw"], help="优化器")
+    parser.add_argument("--seed", type=int, default=42, help="随机种子")
     args = parser.parse_args()
 
     device = f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}, CUDA: {torch.cuda.is_available()}")
 
     configs = ABLATION_CONFIGS
+    orig_indices = list(range(len(ABLATION_CONFIGS)))
     if args.configs:
-        indices = [int(x) if x.isdigit() else x for x in args.configs]
-        configs = [ABLATION_CONFIGS[i] for i in indices]
+        orig_indices = [int(x) for x in args.configs]
+        configs = [ABLATION_CONFIGS[i] for i in orig_indices]
 
     teacher_feats = None
     results = []
 
-    for i, (cfg_name, params, desc) in enumerate(configs):
-        tag = f"cfg{i}_{desc.replace(' ', '').replace('+', '')}"
+    for idx, (cfg_name, params, desc) in enumerate(configs):
+        orig_i = orig_indices[idx]
+        tag = f"cfg{orig_i}_{desc.replace(' ', '').replace('+', '')}"
         print(f"\n{'='*60}")
-        print(f"[{i+1}/{len(configs)}] {desc} (model={cfg_name})")
-        print(f"  w_feat={params['w_feat']}, w_rel={params['w_rel']}, aug={params['use_aug']}")
+        print(f"[{idx+1}/{len(configs)}] {desc} (model={cfg_name}, cfg{orig_i})")
+        print(f"  w_feat={params['w_feat']}, w_rel={params['w_rel']}, aug={params['use_aug']}, distill_start={params['distill_start']}")
         print(f"{'='*60}")
 
         ds = AugFaceDataset(args.data, use_aug=params["use_aug"])
@@ -203,15 +203,17 @@ def main():
             feat_mode="cosine",
         )
 
-        save_name = f"cfg{i}"
+        save_name = f"cfg{orig_i}_seed{args.seed}"
         t0 = time.time()
-        resume_ckpt = args.resume if i == 0 else None
+        resume_ckpt = args.resume if idx == 0 else None
         trainer.train(dl, teacher_feats, epochs=args.epochs, lr=args.lr,
                       save_dir=args.save_dir, save_name=save_name,
                       log_every=100, use_amp=(device != "cpu"),
                       grad_clip=args.grad_clip, resume_from=resume_ckpt,
                       warmup_epochs=args.warmup_epochs,
-                      optimizer_type=args.optimizer)
+                      optimizer_type=args.optimizer,
+                      distill_start_epoch=params["distill_start"],
+                      seed=args.seed)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
         ckpt = torch.load(f"{args.save_dir}/{save_name}_final.pt", map_location=device)

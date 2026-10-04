@@ -11,14 +11,15 @@ LFW 数据一键准备：下载 + 解压 + 生成标准 pairs.txt。
 """
 
 import argparse
+import hashlib
 import os
 import sys
 import tarfile
-import random
 import urllib.request
 
 LFW_URL = "http://vis-www.cs.umass.edu/lfw/lfw.tgz"
 PAIRS_URL = "http://vis-www.cs.umass.edu/lfw/pairs.txt"
+PAIRS_MD5 = "9f1ba174e4e1c508ff7cdf10ac338a7d"
 
 
 def download(url, dest):
@@ -47,46 +48,20 @@ def extract(tgz_path, output_dir):
     print(f"[ok] 解压完成: {lfw_dir}")
 
 
-def generate_pairs(lfw_dir, output_path, num_folds=10, num_pairs_per_fold=300, seed=42):
-    """
-    若官方 pairs.txt 下载失败，从 lfw 目录生成标准格式 pairs.txt。
-    格式: 第一行 "10 300"，之后每折 300 对（前 150 同人，后 150 不同人）。
-    """
-    if os.path.exists(output_path) and os.path.getsize(output_path) > 1000:
-        print(f"[skip] {output_path} 已存在且有效")
-        return
-    random.seed(seed)
-    names = sorted([d for d in os.listdir(lfw_dir)
-                    if os.path.isdir(os.path.join(lfw_dir, d))])
-    name_imgs = {}
-    for n in names:
-        imgs = sorted([f for f in os.listdir(os.path.join(lfw_dir, n))
-                       if f.endswith(".jpg")])
-        if len(imgs) >= 2:
-            name_imgs[n] = imgs
-    names = list(name_imgs.keys())
-    print(f"[pairs] {len(names)} identities with >=2 images, generating pairs...")
-
-    lines = [f"{num_folds} {num_pairs_per_fold}"]
-    for _ in range(num_folds):
-        same = 0
-        while same < num_pairs_per_fold // 2:
-            n = random.choice(names)
-            if len(name_imgs[n]) < 2:
-                continue
-            i1, i2 = random.sample(range(len(name_imgs[n])), 2)
-            lines.append(f"{n} {i1+1} {i2+1}")
-            same += 1
-        diff = 0
-        while diff < num_pairs_per_fold // 2:
-            n1, n2 = random.sample(names, 2)
-            i1 = random.randint(0, len(name_imgs[n1]) - 1)
-            i2 = random.randint(0, len(name_imgs[n2]) - 1)
-            lines.append(f"{n1} {i1+1} {n2} {i2+1}")
-            diff += 1
-    with open(output_path, "w") as f:
-        f.write("\n".join(lines) + "\n")
-    print(f"[ok] pairs.txt 生成: {output_path} ({len(lines)-1} 对)")
+def verify_pairs_md5(pairs_path, expected_md5):
+    """校验 pairs.txt 的 MD5 哈希，确保是官方标准文件。"""
+    if not os.path.exists(pairs_path):
+        return False
+    with open(pairs_path, "rb") as f:
+        actual = hashlib.md5(f.read()).hexdigest()
+    if actual == expected_md5:
+        print(f"[ok] pairs.txt MD5 校验通过: {actual}")
+        return True
+    else:
+        print(f"[error] pairs.txt MD5 不匹配!")
+        print(f"  期望: {expected_md5}")
+        print(f"  实际: {actual}")
+        return False
 
 
 def main():
@@ -104,7 +79,9 @@ def main():
         try:
             download(PAIRS_URL, pairs_path)
         except Exception as e:
-            print(f"[warn] 官方 pairs.txt 下载失败: {e}，将自动生成")
+            print(f"[error] 官方 pairs.txt 下载失败: {e}")
+            print(f"[error] 请手动从 {PAIRS_URL} 下载到 {pairs_path}")
+            sys.exit(1)
 
     extract(tgz_path, args.output_dir)
     lfw_dir = os.path.join(args.output_dir, "lfw")
@@ -112,8 +89,11 @@ def main():
         print(f"[error] {lfw_dir} 不存在，请检查解压")
         sys.exit(1)
 
-    if not (os.path.exists(pairs_path) and os.path.getsize(pairs_path) > 1000):
-        generate_pairs(lfw_dir, pairs_path)
+    if not verify_pairs_md5(pairs_path, PAIRS_MD5):
+        print(f"[error] pairs.txt 不存在或 MD5 校验失败!")
+        print(f"[error] 请手动从 {PAIRS_URL} 下载官方 pairs.txt 到 {pairs_path}")
+        print(f"[error] 拒绝使用非官方 pairs 文件——评测可靠性要求标准 10-fold 协议")
+        sys.exit(1)
 
     n_identities = len([d for d in os.listdir(lfw_dir) if os.path.isdir(os.path.join(lfw_dir, d))])
     print(f"\n[done] LFW 准备完成: {lfw_dir} ({n_identities} identities), pairs: {pairs_path}")

@@ -1,0 +1,20 @@
+﻿Device: cuda:0
+  LFW pairs: 6000
+
+==================================================
+  LFW Evaluation Results: baseline
+==================================================
+  Total pairs:    6000
+  Same pairs:     3000
+  Diff pairs:     3000
+  Accuracy:       96.55%
+  AUC:            0.9921
+  EER:            3.53%
+  Best threshold: 0.3882
+  tar@0.001:       78.07%
+  tar@0.0001:       34.37%
+  tar@1e-06:       34.37%
+==================================================
+
+
+结果已保存到 results/edgeface_1x_lfw.txt

@@ -68,8 +68,8 @@ class DistillTrainer:
 
     def train(self, dataloader, teacher_features, epochs=20, lr=1e-3,
               weight_decay=5e-4, save_dir="weights/distill", save_name="student",
-              log_every=50, use_amp=True, grad_clip=0.0, resume_from=None,
-              warmup_epochs=2, optimizer_type="sgd"):
+              log_every=50, use_amp=True, grad_clip=10.0, resume_from=None,
+              warmup_epochs=2, optimizer_type="sgd", distill_start_epoch=0, seed=42):
         """
         蒸馏训练。dataloader 需返回 (imgs, label, sample_idx)，
         teacher_features[sample_idx] 为对应教师 embedding。
@@ -79,7 +79,14 @@ class DistillTrainer:
             resume_from: checkpoint 路径，从该 checkpoint 恢复训练（含 epoch 信息）
             warmup_epochs: 前 N 个 epoch 线性 warmup 学习率
             optimizer_type: "sgd" (momentum=0.9) 或 "adamw"
+            distill_start_epoch: 前 N 个 epoch 只用 ArcFace，之后再加蒸馏（避免早期梯度冲突）
+            seed: 随机种子，保证可复现
         """
+        import random
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
         import math
         os.makedirs(save_dir, exist_ok=True)
         self.student.train()
@@ -119,12 +126,13 @@ class DistillTrainer:
         nan_skip_count = 0
         for epoch in range(start_epoch, epochs):
             t0 = time.time()
+            use_distill = teacher_features is not None and epoch >= distill_start_epoch
             running = 0.0
             n = 0
             for imgs, labels, idxs in dataloader:
                 imgs = imgs.to(self.device)
                 labels = labels.to(self.device)
-                t_feat = teacher_features[idxs.to(self.device)] if teacher_features is not None else None
+                t_feat = teacher_features[idxs.to(self.device)] if use_distill else None
 
                 optimizer.zero_grad()
                 with torch.amp.autocast("cuda", enabled=(use_amp and self.device != "cpu")):

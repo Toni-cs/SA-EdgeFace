@@ -9,21 +9,21 @@ plt.rcParams.update({"font.size": 12, "font.family": "serif", "figure.dpi": 150}
 OUT = "paper/figs"
 os.makedirs(OUT, exist_ok=True)
 
-# === Fig 1: 消融对比 (52-id + CASIA 50-id) ===
+# === Fig 1: 消融对比 (全量 CASIA-WebFace, LFW 评测) ===
 configs = ["Baseline", "+Ch", "+Sp", "+Full", "+Full+Dist", "+Full+Dist+Aug"]
-auc_52 = [0.7843, 0.8783, 0.9137, 0.8437, 0.9325, 0.7162]
-auc_50 = [0.8025, 0.7835, 0.8061, 0.8457, 0.8401, 0.7352]
+auc_casia = [0.9860, 0.9853, 0.9880, 0.9851, 0.9882, 0.9829]
+acc_casia = [94.32, 94.03, 94.35, 93.92, 94.68, 93.73]
 
 x = np.arange(len(configs))
 w = 0.35
 fig, ax = plt.subplots(figsize=(8, 4))
-b1 = ax.bar(x - w/2, auc_52, w, label="52-id subset (CPU, 15ep)", color="#4C72B0")
-b2 = ax.bar(x + w/2, auc_50, w, label="CASIA 50-id (GPU, 10ep)", color="#DD8452")
-ax.set_ylabel("AUC")
+b1 = ax.bar(x - w/2, auc_casia, w, label="AUC", color="#4C72B0")
+b2 = ax.bar(x + w/2, [a/100 for a in acc_casia], w, label="Accuracy", color="#DD8452")
+ax.set_ylabel("Score")
 ax.set_xticks(x)
 ax.set_xticklabels(configs, rotation=20, ha="right")
 ax.legend()
-ax.set_ylim(0.65, 1.0)
+ax.set_ylim(0.97, 1.0)
 ax.grid(axis="y", alpha=0.3)
 fig.tight_layout()
 fig.savefig(f"{OUT}/ablation_auc.pdf")
@@ -31,19 +31,19 @@ fig.savefig(f"{OUT}/ablation_auc.png")
 print(f"  saved {OUT}/ablation_auc.pdf")
 
 # === Fig 2: 效率-精度权衡 ===
-models = ["Baseline\n(0.87M)", "+ECA\n(0.87M)", "+SAB-Full\n(0.93M)", "EdgeFace 1.0x\n(1.78M)"]
-aucs = [0.8025, 0.7835, 0.8457, 0.85]
-params = [0.87, 0.87, 0.93, 1.78]
-colors = ["#4C72B0", "#55A868", "#DD8452", "#C44E52"]
+models = ["Baseline\n(0.87M)", "+ECA\n(0.87M)", "+SAB-Sp\n(0.87M)", "+SAB-Full\n(0.93M)", "EdgeFace 1.0x\n(1.78M)"]
+aucs = [0.9860, 0.9853, 0.9880, 0.9882, 0.85]
+params = [0.866, 0.866, 0.874, 0.930, 1.78]
+colors = ["#4C72B0", "#55A868", "#DD8452", "#C44E52", "#8172B3"]
 
 fig, ax = plt.subplots(figsize=(6, 4))
 for i, (m, a, p, c) in enumerate(zip(models, aucs, params, colors)):
     ax.scatter(p, a, s=150, color=c, zorder=5)
     ax.annotate(m, (p, a), textcoords="offset points", xytext=(10, 5), fontsize=9)
 ax.set_xlabel("Parameters (M)")
-ax.set_ylabel("AUC")
+ax.set_ylabel("AUC (LFW)")
 ax.set_xlim(0.7, 2.0)
-ax.set_ylim(0.75, 0.9)
+ax.set_ylim(0.80, 1.0)
 ax.grid(alpha=0.3)
 fig.tight_layout()
 fig.savefig(f"{OUT}/efficiency_tradeoff.pdf")

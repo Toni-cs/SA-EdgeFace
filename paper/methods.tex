@@ -1,7 +1,6 @@
 % ============================================================
-% Method Section — Surveillance-Attention EdgeFace
-% 对应论文 Section 3，固化 C1/C2/C3 创新点的正式表述
-% 投稿目标：IEEE Access / Sensors (IEEEtran 格式)
+% Method Section — SA-EdgeFace
+% 对应论文 Section 3
 % ============================================================
 \section{Method}
 \label{sec:method}
@@ -9,59 +8,55 @@
 \subsection{Overall Framework}
 \label{sec:framework}
 
-Given a surveillance frame, the proposed pipeline performs face detection and alignment via an off-the-shelf detector, then extracts a 512-d embedding with our lightweight \emph{Surveillance-Attention EdgeFace} (SA-EdgeFace). The embedding is compared by cosine similarity for verification. The student backbone is a ShuffleNetV2 enhanced with the proposed Surveillance Attention Block (SAB, Sec.~\ref{sec:sab}), trained with a combination of ArcFace supervision, large-teacher knowledge distillation (Sec.~\ref{sec:distill}), and surveillance-degradation augmentation (Sec.~\ref{sec:aug}).
+SA-EdgeFace uses a ShuffleNetV2 backbone with $0.5{\times}$ width multiplier (0.87M parameters), augmented with a \emph{Surveillance Attention Block} (SAB, Sec.~\ref{sec:sab}) at the end of stages~3 and~4. Training follows a two-phase curriculum: Phase~I (epochs 1--19) uses pure ArcFace classification loss to establish discriminative feature distributions; Phase~II (epochs 20--30) introduces cached-teacher feature distillation (Sec.~\ref{sec:distill}) at the reduced learning rate to refine the feature space. This curriculum scheduling is motivated by the temporal threshold finding (Sec.~\ref{sec:temporal}).
 
 \subsection{Surveillance Attention Block (SAB)}
 \label{sec:sab}
 
-Surveillance faces are typically low-resolution and lose global structural cues; recognition therefore relies more on local detail texture. We propose the SAB, which augments a feature tensor with three lightweight branches: channel attention, spatial attention, and multi-scale local detail enhancement.
+The SAB augments a feature tensor with three independently toggleable branches: channel attention, spatial attention, and multi-scale local detail enhancement. The ablation in Sec.~\ref{sec:decomp} isolates each branch's contribution.
 
-\textbf{Channel attention.} We adopt an ECA-style module without FC reduction. Let $\mathbf{x}\in\mathbb{R}^{C\times H\times W}$. Global average pooling yields $\mathbf{g}\in\mathbb{R}^{C}$, and a 1D convolution of kernel $k$ produces the channel weight
-\begin{equation}
-    \mathbf{c} = \sigma\!\left(\mathrm{Conv1D}_k(\mathbf{g})\right),
-    \label{eq:channel}
-\end{equation}
-where $\sigma$ is the sigmoid. This branch adds only $k$ parameters.
+\textbf{Channel attention.} We adopt an ECA-style module without FC reduction. Let $\mathbf{x}\in\mathbb{R}^{C\times H\times W}$. Global average pooling yields $\mathbf{g}\in\mathbb{R}^{C}$, and a 1D convolution of kernel $k$ produces the channel weight $\mathbf{c} = \sigma(\mathrm{Conv1D}_k(\mathbf{g}))$, where $\sigma$ is the sigmoid. This branch adds only $k$ parameters.
 
-\textbf{Spatial attention.} A depth-wise $5{\times}5$ convolution followed by a $1{\times}1$ projection produces a spatial weight map
-\begin{equation}
-    \mathbf{s} = \sigma\!\left(\mathrm{PWConv}(\mathrm{DWConv}_{5\times5}(\mathbf{x}))\right).
-    \label{eq:spatial}
-\end{equation}
+\textbf{Spatial attention.} A depth-wise $5{\times}5$ convolution followed by a $1{\times}1$ projection produces a spatial weight map $\mathbf{s} = \sigma(\mathrm{PWConv}(\mathrm{DWConv}_{5\times5}(\mathbf{x})))$.
 
 \textbf{Local detail enhancement.} To explicitly reinforce local texture at multiple scales,
 \begin{equation}
-    \mathbf{d} = \mathrm{BN}\!\left(\mathrm{PWConv}\!\left(\mathrm{DW}_{3\times3}(\mathbf{x}) + \mathrm{DW}_{5\times5}(\mathbf{x})\right)\right),
+    \mathbf{d} = \mathrm{BN}\!\left(\mathrm{PWConv}\!\left(\mathrm{DW}_{3\times3}(\mathbf{x}) + \mathrm{DW}_{5\times5}(\mathbf{x})\right)\right).
     \label{eq:detail}
 \end{equation}
-where $\mathrm{DW}$ denotes depth-wise convolution. The SAB output combines the three branches with a learnable scalar $\alpha$:
+
+\textbf{Residual gating.} A critical design decision is the \emph{residual} formulation of attention. All attention branches apply as $\mathbf{x} + \mathbf{x} \odot \mathbf{a}$ rather than $\mathbf{x} \odot \mathbf{a}$, where $\mathbf{a}$ is the attention weight. This ensures the output range is $[\mathbf{x}, 2\mathbf{x}]$ rather than $[\mathbf{0}, \mathbf{x}]$, preventing feature collapse when attention weights approach zero. We discovered empirically that the multiplicative form $\mathbf{x} \odot \sigma(\cdot)$ causes gradient vanishing---when $\sigma \to 0$, both the output and gradient vanish, freezing training. The residual form guarantees a unit gradient path through the identity term.
+
+The SAB output combines the branches with a fixed scalar $\alpha{=}0.01$:
 \begin{equation}
-    \mathrm{SAB}(\mathbf{x}) = \mathbf{x} \odot \mathbf{c} \odot \mathbf{s} \;+\; \alpha \cdot \mathbf{d}.
+    \mathrm{SAB}(\mathbf{x}) = \big(\mathbf{x} + \mathbf{x} \odot \mathbf{c}\big) \odot \big(\mathbf{x} + \mathbf{x} \odot \mathbf{s}\big) \odot \big(1 + \alpha \tanh(\mathbf{d})\big).
     \label{eq:sab}
 \end{equation}
-Each branch can be independently toggled for ablation (Sec.~\ref{sec:ablation}).
+The detail branch uses \emph{multiplicative gating} $\big(1 + \alpha \tanh(\mathbf{d})\big)$ with a small fixed $\alpha$ to modulate rather than add, avoiding noise injection into the main feature path. Each branch can be independently toggled for the decomposition study in Sec.~\ref{sec:decomp}.
 
 \subsection{Backbone Integration}
 \label{sec:backbone}
 
-We use ShuffleNetV2 as the lightweight backbone. To keep the parameter overhead small, a single SAB is inserted at the end of each of the two deepest stages (stage~3 and stage~4), rather than after every unit. With a $1.0{\times}$ width multiplier this raises the parameter count from $1.78\,$M to $2.09\,$M ($+17.7\%$); with $0.5{\times}$, from $0.87\,$M to $0.93\,$M ($+7.4\%$).
+We use ShuffleNetV2 as the lightweight backbone. A single SAB is inserted at the end of each of the two deepest stages (stage~3 and stage~4), rather than after every unit, to keep parameter overhead minimal. With $0.5{\times}$ width multiplier this raises the parameter count from $0.87\,$M to $0.93\,$M ($+7.4\%$).
 
 \subsection{Surveillance Degradation Augmentation}
 \label{sec:aug}
 
-To improve robustness to surveillance artifacts, each aligned face is randomly degraded with a composition of: (i) down-up resampling to a target size drawn from $[40, 0.8H]$; (ii) Gaussian blur with kernel $\in\{3,5,7\}$; (iii) random rectangular occlusion covering up to $15\%$ area; (iv) JPEG recompression at quality $[20,60]$; (v) brightness/contrast jitter. Four severity levels (\emph{none/light/medium/heavy}) control the per-operation probabilities.
+To improve robustness to surveillance artifacts, each aligned face is randomly degraded with a composition of: (i) down-up resampling to a target size drawn from $[40, 0.8H]$; (ii) Gaussian blur with kernel $\in\{3,5,7\}$; (iii) random rectangular occlusion covering up to $15\%$ area; (iv) JPEG recompression at quality $[20,60]$; (v) brightness/contrast jitter. Four severity levels (\emph{none/light/medium/heavy}) control the per-operation probabilities. As shown in Sec.~\ref{sec:augment}, this augmentation hurts in the sub-million regime due to capacity constraints.
 
-\subsection{Knowledge Distillation}
+\subsection{Curriculum Distillation}
 \label{sec:distill}
 
-A heavy teacher (InsightFace buffalo\_s, MobileFaceNet backbone) provides 512-d embeddings. To avoid running the teacher online, teacher features are precomputed once per training sample and cached. The total training objective is
+A heavy teacher (InsightFace buffalo\_s, MobileFaceNet backbone, 5.5M parameters) provides 512-d embeddings. To avoid running the teacher online, teacher features are precomputed once per training sample and cached. The total training objective is
 \begin{equation}
-    \mathcal{L} = w_{\mathrm{arc}}\,\mathcal{L}_{\mathrm{arc}} + w_{\mathrm{feat}}\,\mathcal{L}_{\mathrm{feat}} + w_{\mathrm{rel}}\,\mathcal{L}_{\mathrm{rel}},
+    \mathcal{L} = w_{\mathrm{arc}}\,\mathcal{L}_{\mathrm{arc}} + w_{\mathrm{feat}}\,\mathcal{L}_{\mathrm{feat}},
     \label{eq:total}
 \end{equation}
-where $\mathcal{L}_{\mathrm{arc}}$ is the ArcFace margin loss on the student logits,
+where $\mathcal{L}_{\mathrm{arc}}$ is the ArcFace margin loss and
 \begin{equation}
     \mathcal{L}_{\mathrm{feat}} = 1 - \frac{\langle \hat{\mathbf{z}}_s,\, \hat{\mathbf{z}}_t\rangle}{\|\hat{\mathbf{z}}_s\|\,\|\hat{\mathbf{z}}_t\|}
     \label{eq:feat}
 \end{equation}
-is the cosine feature distillation between normalized student embedding $\hat{\mathbf{z}}_s$ and cached teacher embedding $\hat{\mathbf{z}}_t$. We additionally explored a relation distillation term $\mathcal{L}_{\mathrm{rel}}{=}\|\mathbf{R}(\mathbf{z}_s){-}\mathbf{R}(\mathbf{z}_t)\|_F^2$ that preserves the pairwise similarity matrix within each mini-batch, but found it unhelpful on small training sets (Sec.~\ref{sec:distill_analysis}). The default weights are $w_{\mathrm{arc}}{=}1.0$, $w_{\mathrm{feat}}{=}0.1$, $w_{\mathrm{rel}}{=}0$. Setting $w_{\mathrm{feat}}{=}0$ recovers the ArcFace-only baseline for ablation.
+is the cosine feature distillation between normalized student embedding $\hat{\mathbf{z}}_s$ and cached teacher embedding $\hat{\mathbf{z}}_t$.
+
+\textbf{Curriculum scheduling.} The distillation weight $w_{\mathrm{feat}}$ is set to $0.0$ for epochs $1$--$19$ and $0.1$ from epoch~20 onward. This delayed activation is the key finding of Sec.~\ref{sec:temporal}: applying distillation from epoch~0 causes divergence (NaN) or loss plateau, while delaying to the learning-rate decay phase yields stable convergence and $+0.76\%$ accuracy. The intuition is that the student must first establish a discriminative feature distribution under ArcFace supervision alone; teacher signals are beneficial only as refinement of an already-structured feature space, not as guidance during its formation.

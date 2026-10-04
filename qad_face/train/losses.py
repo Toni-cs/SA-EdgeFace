@@ -58,6 +58,7 @@ class FeatureDistillLoss(nn.Module):
         self.mode = mode
 
     def forward(self, student_emb, teacher_emb):
+        student_emb = student_emb.float()
         if self.mode == "mse":
             return F.mse_loss(student_emb, teacher_emb.detach())
         s_norm = F.normalize(student_emb, p=2, dim=1)
