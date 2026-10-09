@@ -10,6 +10,7 @@ import argparse
 import os
 import sys
 import time
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -57,19 +58,24 @@ def count_flops(model, input_size=112):
 
 def measure_latency(model, device, input_size=112, runs=100, warmup=10):
     model = model.to(device).eval()
+    if device == "cpu":
+        torch.set_num_threads(1)
     x = torch.randn(1, 3, input_size, input_size).to(device)
+    lat = []
     with torch.no_grad():
         for _ in range(warmup):
             model(x)
         if device != "cpu":
             torch.cuda.synchronize()
-        t0 = time.time()
         for _ in range(runs):
+            t0 = time.time()
             model(x)
-        if device != "cpu":
-            torch.cuda.synchronize()
-        elapsed = time.time() - t0
-    return elapsed / runs * 1000
+            if device != "cpu":
+                torch.cuda.synchronize()
+            lat.append((time.time() - t0) * 1000)
+    lat = np.array(lat)
+    return {"mean_ms": float(lat.mean()), "median_ms": float(np.median(lat)),
+            "p95_ms": float(np.percentile(lat, 95)), "all_ms": lat.tolist()}
 
 
 def main():
@@ -82,8 +88,11 @@ def main():
 
     device = args.device if (args.device == "cpu" or torch.cuda.is_available()) else "cpu"
 
-    print(f"\n{'Config':<22} {'Params(M)':>10} {'FLOPs(G)':>10} {'Latency(ms)':>12}")
-    print("-" * 58)
+    import platform as _platform
+    machine = f"{_platform.machine()} {_platform.processor() or _platform.system()}"
+
+    print(f"\n{'Config':<22} {'Params(M)':>10} {'FLOPs(G)':>10} {'Lat(mean)':>10} {'Lat(med)':>10} {'Lat(P95)':>10}")
+    print("-" * 74)
     results = []
     for name in args.configs:
         try:
@@ -91,21 +100,25 @@ def main():
             params = count_params(model)
             flops = count_flops(model, args.input_size)
             lat = measure_latency(model, device, args.input_size, args.runs)
-            print(f"{name:<22} {params/1e6:>10.3f} {flops/1e9:>10.4f} {lat:>12.3f}")
+            print(f"{name:<22} {params/1e6:>10.3f} {flops/1e9:>10.4f} "
+                  f"{lat['mean_ms']:>10.3f} {lat['median_ms']:>10.3f} {lat['p95_ms']:>10.3f}")
             results.append({"config": name, "params_M": params / 1e6,
-                            "flops_G": flops / 1e9, "latency_ms": lat})
+                            "flops_G": flops / 1e9, **lat})
         except Exception as e:
             print(f"{name:<22} ERROR: {e}")
 
     os.makedirs("results", exist_ok=True)
-    out_path = os.path.join("results", "efficiency.txt")
+    out_path = os.path.join("results", f"efficiency_{device}_t{int(time.time())}.txt")
     with open(out_path, "w") as f:
-        f.write(f"device={device} input_size={args.input_size} runs={args.runs}\n")
-        f.write(f"{'Config':<22} {'Params(M)':>10} {'FLOPs(G)':>10} {'Latency(ms)':>12}\n")
+        f.write(f"device={device} input_size={args.input_size} runs={args.runs} "
+                f"threads={torch.get_num_threads()} machine={machine} time={int(time.time())}\n")
+        f.write(f"{'Config':<22} {'Params(M)':>10} {'FLOPs(G)':>10} "
+                f"{'Lat_mean':>10} {'Lat_med':>10} {'Lat_p95':>10}\n")
         for r in results:
             f.write(f"{r['config']:<22} {r['params_M']:>10.3f} "
-                    f"{r['flops_G']:>10.4f} {r['latency_ms']:>12.3f}\n")
-    print(f"\n[INFO] saved to {out_path}")
+                    f"{r['flops_G']:>10.4f} {r['mean_ms']:>10.3f} "
+                    f"{r['median_ms']:>10.3f} {r['p95_ms']:>10.3f}\n")
+    print(f"\n[INFO] saved to {out_path}（不覆盖旧文件）")
 
 
 if __name__ == "__main__":
