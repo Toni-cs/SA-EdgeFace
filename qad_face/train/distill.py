@@ -206,16 +206,30 @@ class DistillTrainer:
             ran_epochs += 1
         if ran_epochs < epochs - start_epoch:
             raise RuntimeError(f"训练在 ep{start_epoch + ran_epochs} 提前终止")
-        self.save(os.path.join(save_dir, f"{save_name}_final.pt"), optimizer, scheduler, epochs, avg)
+        ok = self.save(os.path.join(save_dir, f"{save_name}_final.pt"), optimizer, scheduler, epochs, avg)
+        if not ok:
+            raise RuntimeError(f"final checkpoint 被健康门拒绝保存: {save_dir}/{save_name}_final.pt")
         print(f"[done] final model saved to {save_dir}/{save_name}_final.pt")
 
     def save(self, path, optimizer=None, scheduler=None, epoch=None, train_loss=None):
         if optimizer is not None and scheduler is not None:
-            has_nan = any(torch.isnan(p).any().item()
-                          for p in self.student.parameters() if p.requires_grad)
-            if has_nan:
-                print(f"[WARN] student 权重含 NaN，禁止覆盖 {path}")
-                return
+            bad_nan = 0; abs_vals = []
+            for p in self.student.parameters():
+                if not p.requires_grad: continue
+                t = p.detach().double()
+                bad_nan += int(torch.isnan(t).sum()) + int(torch.isinf(t).sum())
+                f = t[torch.isfinite(t)]
+                if f.numel(): abs_vals.append(f.abs())
+            if bad_nan:
+                print(f"[WARN] student 权重含 {bad_nan} 个非有限值，禁止覆盖 {path}")
+                return False
+            if abs_vals:
+                a = torch.cat(abs_vals); med = float(a.median())
+                frac_dead = float((a < 1e-30).double().mean())
+                print(f"[health] med|w|={med:.3e} frac(<1e-30)={frac_dead:.4f}")
+                if med < 1e-8 or frac_dead > 0.01:
+                    print(f"[WARN] 权重静默湮灭 (med|w|={med:.3e})，拒绝保存 {path}")
+                    return False
         ckpt = {
             "student": self.student.state_dict(),
             "arcface": self.arcface.state_dict(),
@@ -230,6 +244,7 @@ class DistillTrainer:
             ckpt["train_loss"] = train_loss
         ckpt["eval_history"] = self.eval_history
         torch.save(ckpt, path)
+        return True
 
     def load(self, path):
         ckpt = torch.load(path, map_location=self.device)

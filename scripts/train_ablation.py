@@ -219,6 +219,7 @@ def main():
                       optimizer_type=args.optimizer,
                       distill_start_epoch=params["distill_start"],
                       seed=args.seed, eval_fn=eval_wrapper)
+        _assert_health(os.path.join(args.save_dir, f"{save_name}_final.pt"), args.epochs)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
         ckpt = torch.load(f"{args.save_dir}/{save_name}_final.pt", map_location=device)
@@ -237,6 +238,16 @@ def main():
     for desc, auc, acc, sep, t in results:
         print(f"  {desc:<25} {auc:>8.4f} {acc*100:>7.2f}% {sep:>8.4f} {t:>7.0f}s")
     print(f"{'='*60}")
+
+
+def _assert_health(path, epochs_expected):
+    import torch
+    ck = torch.load(path, map_location="cpu")
+    assert ck.get("epoch") == epochs_expected, f"{path} epoch={ck.get('epoch')} != {epochs_expected}"
+    nan = sum(int(torch.isnan(v).sum()) + int(torch.isinf(v).sum())
+              for v in ck["student"].values() if torch.is_floating_point(v))
+    assert nan == 0, f"{path} contains {nan} non-finite values"
+    print(f"[health-ok] {path} epoch={epochs_expected} nonfinite=0")
 
 
 if __name__ == "__main__":
