@@ -7,9 +7,11 @@
 产出:
     results/multiseed_lfw.json   (每 config 每 seed 的指标 + t 检验结果)
 """
+import argparse
 import os
 import sys
 import json
+import time
 import numpy as np
 import torch
 import cv2
@@ -23,7 +25,6 @@ from qad_face.evaluation.lfw_eval import load_pairs, get_image_path, evaluate_lf
 WEIGHTS_DIR = "weights/ablation_casia"
 LFW_DIR = "datasets/lfw_aligned"
 PAIRS_PATH = "datasets/pairs.txt"
-OUTPUT_PATH = "results/multiseed_lfw.json"
 
 CONFIGS = {
     "cfg0": {"model_key": "x05_baseline", "desc": "baseline"},
@@ -46,7 +47,8 @@ def extract_features(model, image_paths, batch_size=64):
         for p in batch_paths:
             img = imread_cn(p)
             if img is None:
-                cache[p] = np.zeros(512, dtype=np.float32)
+                print(f"[ERROR] 图片不可读，缺失即中止: {p}")
+                sys.exit(3)
                 continue
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             img = cv2.resize(img, (112, 112)).astype(np.float32) / 127.5 - 1.0
@@ -103,8 +105,14 @@ def evaluate_config_seed(cfg_id, model_key, seed):
     for n1, i1, n2, i2, s in pairs:
         p1 = get_image_path(LFW_DIR, n1, i1)
         p2 = get_image_path(LFW_DIR, n2, i2)
-        features.append(cache.get(p1, np.zeros(512, dtype=np.float32)))
-        features.append(cache.get(p2, np.zeros(512, dtype=np.float32)))
+        if p1 not in cache:
+            print(f"[ERROR] missing image {p1}")
+            sys.exit(3)
+        if p2 not in cache:
+            print(f"[ERROR] missing image {p2}")
+            sys.exit(3)
+        features.append(cache[p1])
+        features.append(cache[p2])
         is_same_list.append(s)
 
     result = evaluate_lfw(np.array(features), pairs, is_same_list,
@@ -152,6 +160,19 @@ def paired_t_test(metric_name, cfg_a, cfg_b, results):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out", type=str, default=None, help="输出 json（默认 results/multiseed_<时间戳>.json）")
+    parser.add_argument("--commit", action="store_true", help="写 results/multiseed_lfw.json（仅当文件不存在）")
+    args = parser.parse_args()
+    if args.commit:
+        out_path = "results/multiseed_lfw.json"
+    elif args.out:
+        out_path = args.out
+    else:
+        out_path = os.path.join("results", f"multiseed_{time.strftime('%Y%m%d_%H%M%S')}.json")
+    if os.path.exists(out_path):
+        print(f"[ERROR] 目标文件已存在，拒绝覆盖: {out_path}")
+        sys.exit(5)
     pairs = load_pairs(PAIRS_PATH)
     print(f"Pairs: {len(pairs)}, Device: {DEVICE}\n")
 
@@ -185,10 +206,10 @@ def main():
         "seeds": SEEDS,
     }
 
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
-    print(f"\nSaved: {OUTPUT_PATH}")
+    print(f"\nSaved: {out_path}")
 
 
 if __name__ == "__main__":
