@@ -84,6 +84,8 @@ def main():
     parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--input_size", type=int, default=112)
     parser.add_argument("--runs", type=int, default=100)
+    parser.add_argument("--warmup", type=int, default=10, help="预热次数（默认与历史行为一致）")
+    parser.add_argument("--repeats", type=int, default=1, help="整段时延测量重复次数（Phase 5 正式表用 3）")
     args = parser.parse_args()
 
     device = args.device if (args.device == "cpu" or torch.cuda.is_available()) else "cpu"
@@ -99,7 +101,11 @@ def main():
             model = build_by_name(name)
             params = count_params(model)
             flops = count_flops(model, args.input_size)
-            lat = measure_latency(model, device, args.input_size, args.runs)
+            segs = [measure_latency(model, device, args.input_size, args.runs, warmup=args.warmup)
+                    for _ in range(max(1, args.repeats))]
+            pooled = [x for s0 in segs for x in s0["all_ms"]]
+            lat = {"mean_ms": float(np.mean(pooled)), "median_ms": float(np.median(pooled)),
+                   "p95_ms": float(np.percentile(pooled, 95)), "all_ms": pooled}
             print(f"{name:<22} {params/1e6:>10.3f} {flops/1e9:>10.4f} "
                   f"{lat['mean_ms']:>10.3f} {lat['median_ms']:>10.3f} {lat['p95_ms']:>10.3f}")
             results.append({"config": name, "params_M": params / 1e6,
@@ -110,7 +116,7 @@ def main():
     os.makedirs("results", exist_ok=True)
     out_path = os.path.join("results", f"efficiency_{device}_t{int(time.time())}.txt")
     with open(out_path, "w") as f:
-        f.write(f"device={device} input_size={args.input_size} runs={args.runs} "
+        f.write(f"device={device} input_size={args.input_size} runs={args.runs} warmup={args.warmup} repeats={args.repeats} "
                 f"threads={torch.get_num_threads()} machine={machine} time={int(time.time())}\n")
         f.write(f"{'Config':<22} {'Params(M)':>10} {'FLOPs(G)':>10} "
                 f"{'Lat_mean':>10} {'Lat_med':>10} {'Lat_p95':>10}\n")

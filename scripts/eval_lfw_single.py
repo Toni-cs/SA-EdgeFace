@@ -23,7 +23,19 @@ CONFIGS = [
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--cfg", type=int, default=0, help="config index 0-5")
+    parser.add_argument("--ckpt", type=str, default=None, help="checkpoint 路径（默认 weights/ablation_casia/<save_name>_final.pt）")
+    parser.add_argument("--out", type=str, default=None, help="输出 json（默认 results/lfw_10fold_cfgN.json；已存在则拒绝覆盖）")
+    parser.add_argument("--arch", choices=["edgeface", "mobilefacenet"], default=None, help="模型架构；--ckpt 指向 mbf 臂时必须显式指定")
     args = parser.parse_args()
+    base = os.path.basename(args.ckpt or "").lower()
+    if (("mbf" in base) or ("mobilefacenet" in base)) and args.arch != "mobilefacenet":
+        print("[ERROR] --ckpt 指向 MobileFaceNet 臂但未显式 --arch mobilefacenet（拒绝静默错配）")
+        sys.exit(6)
+    if args.arch is None:
+        args.arch = "edgeface"
+    if args.arch == "mobilefacenet":
+        print("[ERROR] 仓库内无 MobileFaceNet 实现，无法构建（组E 前置缺口，登记 CONFLICTS.md）")
+        sys.exit(6)
 
     save_name, cfg_name, desc = CONFIGS[args.cfg]
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -35,6 +47,7 @@ def main():
         needed.add(get_image_path(LFW_DIR, name1, idx1))
         needed.add(get_image_path(LFW_DIR, name2, idx2))
     needed = sorted(needed)
+    assert len(needed) > 0, "no LFW pairs loaded"
 
     print("Preloading images...")
     imgs_cache = {}
@@ -51,7 +64,7 @@ def main():
         sys.exit(1)
     print(f"  loaded {len(imgs_cache)}/{len(needed)}")
 
-    ckpt_path = os.path.join(SAVE_DIR, f"{save_name}_final.pt")
+    ckpt_path = args.ckpt if args.ckpt else os.path.join(SAVE_DIR, f"{save_name}_final.pt")
     model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
     ckpt = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(ckpt["student"], strict=False)
@@ -79,14 +92,19 @@ def main():
         is_same_list.append(is_same)
 
     r = evaluate_lfw(np.array(features), pairs, is_same_list)
-    print(f"\n  Acc(10-fold CV) = {r['accuracy']*100:.2f}% +/- {r.get('accuracy_std',0)*100:.2f}%")
+    print(f"\n  Acc(CV) = {r['accuracy']*100:.2f}% +/- {r.get('accuracy_std',0)*100:.2f}%")
     print(f"  Acc(oracle)     = {r.get('accuracy_oracle',0)*100:.2f}%  [ref]")
     print(f"  AUC = {r['auc']:.4f}  EER = {r['eer']*100:.2f}%")
     print(f"  TAR@1e-3 = {r.get('tar@0.001',0)*100:.2f}%  TAR@1e-4 = {r.get('tar@0.0001',0)*100:.2f}%")
 
-    out = f"results/lfw_10fold_cfg{args.cfg}.json"
+    out = args.out if args.out else f"results/lfw_10fold_cfg{args.cfg}.json"
+    if os.path.exists(out):
+        print(f"[ERROR] 目标文件已存在，拒绝覆盖: {out}（请传 --out <新路径>）")
+        sys.exit(5)
+    payload = {"config": save_name, "desc": desc, "ckpt": ckpt_path,
+               "acc_cv": r["accuracy"], "gate_pass": bool(r["accuracy"] >= 0.92), **r}
     with open(out, "w", encoding="utf-8") as f:
-        json.dump({"config": save_name, "desc": desc, **r}, f, indent=2, ensure_ascii=False)
+        json.dump(payload, f, indent=2, ensure_ascii=False)
     print(f"  saved to {out}")
 
 

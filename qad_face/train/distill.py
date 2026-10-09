@@ -81,7 +81,7 @@ class DistillTrainer:
               weight_decay=5e-4, save_dir="weights/distill", save_name="student",
               log_every=50, use_amp=True, grad_clip=10.0, resume_from=None,
               warmup_epochs=2, optimizer_type="sgd", distill_start_epoch=0, seed=None,
-              eval_fn=None):
+              eval_fn=None, eval_every=0):
         """
         蒸馏训练。dataloader 需返回 (imgs, label, sample_idx)，
         teacher_features[sample_idx] 为对应教师 embedding。
@@ -93,7 +93,7 @@ class DistillTrainer:
             optimizer_type: "sgd" (momentum=0.9) 或 "adamw"
             distill_start_epoch: 前 N 个 epoch 只用 ArcFace，之后再加蒸馏（避免早期梯度冲突）
             seed: 仅影响 DataLoader shuffle / 后续随机；模型初始化复现需在 __init__ 传 seed
-            eval_fn: callable(model, device) -> dict，每 2 个 epoch 调用一次（如 AUC/Acc）
+        eval_fn: callable(model, device) -> dict；eval_every>0 时每 eval_every 个 epoch 调用一次（默认 0=训练中不 eval，训练末由调用方自评一次）
         """
         import random
         if seed is not None:
@@ -191,7 +191,7 @@ class DistillTrainer:
                   f"lr={scheduler.get_last_lr()[0]:.2e} time={time.time()-t0:.1f}s"
                   f"{f' nan_skipped={nan_skip_count}' if nan_skip_count else ''}")
             self.eval_history.append({"epoch": epoch + 1, "avg_loss": avg})
-            if eval_fn is not None and (epoch + 1 - start_epoch) % 2 == 0:
+            if eval_fn is not None and eval_every > 0 and (epoch + 1 - start_epoch) % eval_every == 0:
                 try:
                     m = eval_fn(self.student, self.device)
                     if isinstance(m, dict):
@@ -199,7 +199,9 @@ class DistillTrainer:
                         print(f"  [eval ep{epoch+1}] AUC={m.get('auc', float('nan')):.4f} "
                               f"Acc={m.get('acc', float('nan'))*100:.2f}%")
                 except Exception as e:
-                    print(f"  [eval warn] eval_fn 失败: {e}")
+                    print(f"  [eval warn] eval_fn failed: {e}")
+                finally:
+                    self.student.train()
             self.save(os.path.join(save_dir, f"{save_name}_ep{epoch+1}.pt"), optimizer, scheduler, epoch + 1, avg)
             ran_epochs += 1
         if ran_epochs < epochs - start_epoch:
