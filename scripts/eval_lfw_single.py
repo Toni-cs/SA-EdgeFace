@@ -30,10 +30,11 @@ def main():
     print(f"Device: {device}, Config: {desc} ({save_name})")
 
     pairs = load_pairs(PAIRS_PATH)
-    needed = sorted(set())
+    needed = set()
     for name1, idx1, name2, idx2, is_same in pairs:
         needed.add(get_image_path(LFW_DIR, name1, idx1))
         needed.add(get_image_path(LFW_DIR, name2, idx2))
+    needed = sorted(needed)
 
     print("Preloading images...")
     imgs_cache = {}
@@ -44,6 +45,10 @@ def main():
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = cv2.resize(img, (112, 112)).astype(np.float32) / 127.5 - 1.0
                 imgs_cache[p] = np.transpose(img, (2, 0, 1))
+    if len(imgs_cache) < len(needed):
+        missing = [p for p in needed if p not in imgs_cache]
+        print(f"[ERROR] {len(missing)} LFW images unreadable (e.g. {missing[0]})")
+        sys.exit(1)
     print(f"  loaded {len(imgs_cache)}/{len(needed)}")
 
     ckpt_path = os.path.join(SAVE_DIR, f"{save_name}_final.pt")

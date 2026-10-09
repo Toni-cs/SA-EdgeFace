@@ -201,7 +201,12 @@ def main():
             num_classes=ds.num_classes, device=device,
             w_arc=1.0, w_feat=params["w_feat"], w_rel=params["w_rel"],
             feat_mode="cosine",
+            seed=args.seed,
         )
+
+        def eval_wrapper(m, dev):
+            auc_v, acc_v, sep_v = eval_model(m, ds, dev)
+            return {"auc": auc_v, "acc": acc_v, "sep": sep_v}
 
         save_name = f"cfg{orig_i}_seed{args.seed}"
         t0 = time.time()
@@ -213,7 +218,7 @@ def main():
                       warmup_epochs=args.warmup_epochs,
                       optimizer_type=args.optimizer,
                       distill_start_epoch=params["distill_start"],
-                      seed=args.seed)
+                      seed=args.seed, eval_fn=eval_wrapper)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
         ckpt = torch.load(f"{args.save_dir}/{save_name}_final.pt", map_location=device)

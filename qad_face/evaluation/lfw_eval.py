@@ -38,7 +38,7 @@ def get_image_path(lfw_dir, name, idx):
     return os.path.join(lfw_dir, name, f"{name}_{idx:04d}.jpg")
 
 
-def evaluate_lfw(features, pairs, is_same_list):
+def evaluate_lfw(features, pairs, is_same_list, save_pair_data=None):
     """
     给定特征和标签，计算 LFW 指标。
 
@@ -53,6 +53,7 @@ def evaluate_lfw(features, pairs, is_same_list):
         features: np.array, shape (N, 512), 所有人脸的特征（按 pairs 顺序，每对两个特征）
         pairs: list, 从 load_pairs 返回
         is_same_list: list of bool, 每对是否同一人
+        save_pair_data: 若提供目录路径，导出逐对相似度+标签+身份为 npz（身份聚类检验前提）
 
     Returns:
         dict: 包含 accuracy, auc, tar_far1e-3, eer 等指标
@@ -68,6 +69,19 @@ def evaluate_lfw(features, pairs, is_same_list):
 
     similarities = np.array(similarities)
     labels = np.array(labels)
+
+    if save_pair_data is not None:
+        os.makedirs(save_pair_data, exist_ok=True)
+        name1 = [p[0] for p in pairs]
+        name2 = [p[2] for p in pairs]
+        idx1 = [p[1] for p in pairs]
+        idx2 = [p[3] for p in pairs]
+        np.savez_compressed(
+            os.path.join(save_pair_data, "pairs.npz"),
+            similarities=similarities, labels=labels,
+            name1=np.array(name1, dtype=object), name2=np.array(name2, dtype=object),
+            idx1=np.array(idx1), idx2=np.array(idx2),
+        )
     n_pairs = len(pairs)
 
     # ROC 曲线 (全量，阈值无关)

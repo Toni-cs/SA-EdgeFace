@@ -107,7 +107,8 @@ def evaluate_config_seed(cfg_id, model_key, seed):
         features.append(cache.get(p2, np.zeros(512, dtype=np.float32)))
         is_same_list.append(s)
 
-    result = evaluate_lfw(np.array(features), pairs, is_same_list)
+    result = evaluate_lfw(np.array(features), pairs, is_same_list,
+                          save_pair_data=os.path.join("results", "pairs", f"{cfg_id}_seed{seed}"))
     result["converged"] = converged
     status = "OK" if converged else "NOT CONVERGED"
     print(f"  [done] Acc={result['accuracy']*100:.2f}% AUC={result['auc']:.4f} EER={result['eer']*100:.2f}% [{status}]")

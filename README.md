@@ -9,38 +9,38 @@
   <img src="https://img.shields.io/badge/python-3.10+-green.svg" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-2.4+-ee4c2c.svg" alt="PyTorch">
   <img src="https://img.shields.io/badge/params-0.93M-orange.svg" alt="Params">
-  <img src="https://img.shields.io/badge/LFW-94.68%25-brightgreen.svg" alt="LFW">
+  <img src="https://img.shields.io/badge/LFW-94.30%25-brightgreen.svg" alt="LFW">
 </p>
 
 ## Overview
 
-SA-EdgeFace is a lightweight face recognition model designed for **surveillance-edge deployment**. Built on ShuffleNetV2 0.5× (0.87M parameters), it achieves **94.68% LFW accuracy** with **11.1ms CPU latency**.
+SA-EdgeFace is a lightweight face recognition model designed for **surveillance-edge deployment**. Built on ShuffleNetV2 0.5× (0.87M parameters), it achieves **94.30% LFW accuracy** (10-fold CV) with sub-million parameters.
 
-This repository accompanies our IEEE Access paper studying a critical question: **do enhancement techniques (attention, distillation, augmentation) transfer to the sub-million-parameter regime?** Through systematic ablation on CASIA-WebFace → LFW, we find that **three of four enhancement categories hurt** below 1M parameters, and the sole distillation strategy that works is governed by a **temporal threshold** rather than a weight threshold.
+This repository accompanies our IEEE Access paper studying a critical question: **do enhancement techniques (attention, distillation, augmentation) transfer to the sub-million-parameter regime?** Through systematic ablation on CASIA-WebFace → LFW, we find that **three of four enhancement categories hurt** below 1M parameters, and the sole distillation strategy that works peaks at the ep-20 onset, which coincides with the first learning-rate decay and is therefore confounded; a factorial design that isolates timing from the schedule is reported in the paper.
 
 ### Key Findings
 
 | Technique | Effect (<1M params) | Recommendation |
 |-----------|---------------------|----------------|
-| Channel attention (ECA) | −0.29% (hurts) | Avoid |
-| **Spatial attention** | **+AUC, ROC tail improvement** | **Use** |
-| Multi-branch attention | −0.43% (capacity contention) | Avoid |
+| Channel attention (ECA) | −0.25% (hurts) | Avoid |
+| **Spatial attention** | **+0.9880 AUC (C2−C0 +0.0019) vs 0.9860, but −0.17 pp CV accuracy, sign reversed, not significant** | **Use only if the operating point is AUC-driven** |
+| Multi-branch attention | −0.42% (capacity contention) | Avoid |
 | KD from scratch | Diverges (NaN) | Avoid |
-| **Curriculum KD** (delayed) | **+0.76% (sole accuracy gain)** | **Use** |
-| Degradation augmentation | −0.95% (capacity threshold) | Avoid (<2M) |
+| **Curriculum KD** (delayed) | **+0.67 pp vs C3 (95% CI crosses zero; not significant among the 15 Holm-corrected comparisons, min Welch p = 0.1726)** | **Use** |
+| Degradation augmentation | −0.60% (capacity threshold) | Avoid (<2M) |
 
 ## Results
 
-### Ablation on LFW (CASIA-WebFace, 30 epochs, 10-fold protocol)
+### Ablation on LFW (CASIA-WebFace, 30 epochs; evaluated with the 10-fold CV evaluation protocol)
 
 | Config | Description | Acc (%) | AUC | EER (%) | Params (M) |
 |--------|-------------|---------|-----|---------|------------|
-| C0 | baseline | 94.32 | 0.9860 | 5.85 | 0.866 |
-| C1 | +channel attention | 94.03 | 0.9853 | 6.22 | 0.866 |
-| C2 | +spatial attention | 94.35 | 0.9880 | 5.78 | 0.874 |
-| C3 | +full SAB | 93.92 | 0.9851 | 6.12 | 0.930 |
-| **C4** | **+curriculum distill** | **94.68** | **0.9882** | **5.47** | **0.930** |
-| C5 | +augmentation | 93.73 | 0.9829 | 6.43 | 0.930 |
+| C0 | baseline | 94.22 | 0.9860 | 5.85 | 0.866 |
+| C1 | +channel attention | 93.97 | 0.9853 | 6.17 | 0.866 |
+| C2 | +spatial attention | 94.05 | 0.9880 | 5.80 | 0.874 |
+| C3 | +full SAB | 93.63 | 0.9851 | 6.12 | 0.930 |
+| **C4** | **+curriculum distill** | **94.30** | **0.9882** | **5.47** | **0.930** |
+| C5 | +augmentation | 93.70 | 0.9829 | 6.43 | 0.930 |
 
 ### Comparison with Baselines
 
@@ -48,14 +48,14 @@ This repository accompanies our IEEE Access paper studying a critical question: 
 |--------|---------|-----|------------|
 | EdgeFace 1.0× | 96.55 | 0.9921 | 1.78 |
 | InsightFace-s (teacher) | 99.22 | 0.9965 | 5.5 |
-| **SA-EdgeFace (ours)** | **94.68** | **0.9882** | **0.93** |
+| **SA-EdgeFace (ours)** | **94.30** | **0.9882** | **0.93** |
 
 ### Efficiency (CPU, 112×112 input)
 
 | Model | Params (M) | FLOPs (G) | Latency (ms) |
 |-------|-----------|-----------|--------------|
-| C0 baseline (0.5×) | 0.866 | 0.0228 | 8.3 |
-| **C4 SA-EdgeFace** | **0.930** | **0.0259** | **11.1** |
+| C0 baseline (0.5×) | 0.866 | 0.0228 | 8.3 (legacy, unverified) |
+| **C4 SA-EdgeFace** | **0.930** | **0.0259** | **11.1 (legacy, unverified)** |
 | EdgeFace 1.0× | 1.778 | 0.0799 | 9.8 |
 
 ## Quick Start
@@ -98,7 +98,7 @@ python scripts/train_edgeface_1x.py --data datasets/raw/casia-webface --gpu 0
 python scripts/eval_lfw_full.py
 
 # Single config
-python scripts/eval_lfw_single.py --config cfg4
+python scripts/eval_lfw_single.py --cfg 4
 
 # Efficiency benchmark
 python scripts/eval_efficiency.py

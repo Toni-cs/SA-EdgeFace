@@ -32,6 +32,12 @@ BATCH_CONFIGS = [
 def load_model(ckpt_path, cfg_name, device):
     model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
     ckpt = torch.load(ckpt_path, map_location=device)
+    if "student" not in ckpt:
+        raise ValueError(f"[ERROR] {ckpt_path} 缺少 student 权重")
+    if "epoch" in ckpt:
+        print(f"    [ckpt] epoch={ckpt['epoch']}")
+        if ckpt.get("epoch", 0) < 25:
+            raise ValueError(f"[ERROR] {ckpt_path} epoch={ckpt['epoch']}<25，疑似未完成/抽样训练，拒绝评测")
     model.load_state_dict(ckpt["student"], strict=False)
     model.eval()
     return model
@@ -58,6 +64,9 @@ def preload_images(paths):
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 img = cv2.resize(img, (112, 112)).astype(np.float32) / 127.5 - 1.0
                 imgs[p] = np.transpose(img, (2, 0, 1))
+    if len(imgs) < len(paths):
+        missing = [p for p in paths if p not in imgs]
+        raise ValueError(f"[ERROR] {len(missing)} LFW 图片不可读 (e.g. {missing[0]})，评测中止")
     return imgs
 
 
@@ -103,16 +112,23 @@ def main():
     print(f"  loaded {len(imgs_cache)} images, missing: {len(needed) - len(imgs_cache)}")
 
     all_results = []
+    missing = []
     for save_name, cfg_name, desc in BATCH_CONFIGS:
         ckpt_path = os.path.join(SAVE_DIR, f"{save_name}_final.pt")
         if not os.path.exists(ckpt_path):
             print(f"SKIP {desc}: {ckpt_path} not found")
+            missing.append(save_name)
             continue
         print(f"\n{'='*60}")
         print(f"  {desc} ({save_name})")
         print(f"{'='*60}")
 
-        model = load_model(ckpt_path, cfg_name, device)
+        try:
+            model = load_model(ckpt_path, cfg_name, device)
+        except ValueError as e:
+            print(e)
+            missing.append(save_name)
+            continue
         cache = batch_extract(model, needed, device, imgs_cache)
         print(f"    features extracted")
 
@@ -126,7 +142,8 @@ def main():
             is_same_list.append(is_same)
 
         features = np.array(features)
-        r = evaluate_lfw(features, pairs, is_same_list)
+        pair_dir = os.path.join("results", "pairs", save_name)
+        r = evaluate_lfw(features, pairs, is_same_list, save_pair_data=pair_dir)
         print(f"  Acc(CV)={r['accuracy']*100:.2f}% +/- {r.get('accuracy_std',0)*100:.2f}%  Acc(oracle)={r.get('accuracy_oracle',0)*100:.2f}%")
         print(f"  AUC={r['auc']:.4f}  EER={r['eer']*100:.2f}%")
         print(f"  TAR@1e-3={r.get('tar@0.001',0)*100:.2f}%  TAR@1e-4={r.get('tar@0.0001',0)*100:.2f}%")
@@ -147,6 +164,11 @@ def main():
         del model
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+
+    if missing:
+        print(f"\n[ERROR] 缺失 {len(missing)}/{len(BATCH_CONFIGS)} 配置: {missing}")
+        print("[ERROR] 拒绝覆写输出文件")
+        sys.exit(1)
 
     with open(OUTPUT, "w", encoding="utf-8") as f:
         json.dump(all_results, f, indent=2, ensure_ascii=False)

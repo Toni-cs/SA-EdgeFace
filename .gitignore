@@ -21,9 +21,16 @@ venv/
 logs_multiseed/
 *.log
 
+# 审查/临时产物（永不提交）
+results/_*
+
 # Paper (不公开)
 paper/
 
 # OS
 Thumbs.db
 .DS_Store
+# 内部审查脚本/中间产物（永不提交）
+results/stat_*
+results/statistical_*
+scripts/_*
