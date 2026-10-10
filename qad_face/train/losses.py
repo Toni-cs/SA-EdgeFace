@@ -31,8 +31,8 @@ class ArcFaceLoss(nn.Module):
 
     def forward(self, embedding, label):
         embedding = embedding.float()
-        cosine = F.linear(F.normalize(embedding), F.normalize(self.weight))
-        sine = torch.sqrt(1.0 - cosine * cosine + 1e-9)
+        cosine = F.linear(F.normalize(embedding), F.normalize(self.weight.float())).float()
+        sine = torch.sqrt((1.0 - cosine * cosine).clamp_min(1e-9))
         phi = cosine * self.cos_m - sine * self.sin_m
         if self.easy_margin:
             phi = torch.where(cosine > 0, phi, cosine)

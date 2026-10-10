@@ -34,3 +34,7 @@ Thumbs.db
 results/stat_*
 results/statistical_*
 scripts/_*
+results/multiseed_lfw.json
+results/lfw_10fold_cfg4.json
+results/efficiency_cpu_*.txt
+results/pairs/

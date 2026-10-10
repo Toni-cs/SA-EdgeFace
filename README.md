@@ -47,7 +47,7 @@ This repository accompanies our IEEE Access paper studying a critical question: 
 | Method | Acc (%) | AUC | Params (M) |
 |--------|---------|-----|------------|
 | EdgeFace 1.0× | 96.55 | 0.9921 | 1.78 |
-| InsightFace-s (teacher) | 99.22 | 0.9965 | 5.5 |
+| InsightFace-s (teacher) | 99.22 | 0.9965 | 3.40 |
 | **SA-EdgeFace (ours)** | **94.30** | **0.9882** | **0.93** |
 
 ### Efficiency (CPU, 112×112 input)
@@ -124,7 +124,7 @@ Three independently toggleable branches with residual gating:
 
 ### Curriculum Distillation
 
-- **Teacher**: InsightFace buffalo_s (w600k_mbf, 512-d, 5.5M params)
+- **Teacher**: InsightFace buffalo_s (w600k_mbf, 512-d, 3.4M params / 3,400,448)
 - **Strategy**: Pure ArcFace for epochs 1–19, distillation activates at epoch 20 (lr decay phase)
 - **Loss**: `L = L_arc + 0.1 · L_feat` (cosine feature distillation)
 - Teacher features pre-computed and cached (no online teacher inference)

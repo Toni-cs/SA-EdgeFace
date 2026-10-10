@@ -78,14 +78,37 @@ class AugFaceDataset(torch.utils.data.Dataset):
 
 def precompute_teacher_cache(dataset, cache_path, batch_size=256):
     """预计算 buffalo_s 教师特征并缓存（批量 GPU 加速）。"""
+    import hashlib
+    expected_npy = "f3fbd8b19c20d7e6205093176e61c6d9e6e5535922b2cf1372ef445fa39f0dfe"
+    expected_onnx = "9cc6e4a75f0e2bf0b1aed94578f144d15175f357bdc05e815e5c4a02b319eb4f"
+    if not cache_path.replace("\\", "/").startswith("weights/ablation_casia/"):
+        print(f"[ERROR] teacher cache 路径非唯一备案（D-20）: {cache_path}，必须是 weights/ablation_casia/")
+        sys.exit(7)
     if os.path.exists(cache_path):
         feats = np.load(cache_path)
-        print(f"  [Teacher] loaded cache: {feats.shape} from {cache_path}")
+        if feats.shape != (490623, 512):
+            print(f"[ERROR] teacher cache shape {feats.shape} != (490623, 512)（D-20）")
+            sys.exit(7)
+        h = hashlib.sha256()
+        with open(cache_path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                h.update(chunk)
+        if h.hexdigest() != expected_npy:
+            print(f"[ERROR] teacher cache sha256 mismatch（D-20）: {h.hexdigest()[:16]}…")
+            sys.exit(7)
+        print(f"  [Teacher] loaded cache: {feats.shape} from {cache_path} (sha256 verified)")
         return torch.from_numpy(feats).float()
 
     import onnxruntime as ort
     print(f"  [Teacher] precomputing for {len(dataset)} samples (batch={batch_size})...")
     onnx_path = "weights/models/buffalo_s/w600k_mbf.onnx"
+    h = hashlib.sha256()
+    with open(onnx_path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    if h.hexdigest() != expected_onnx:
+        print(f"[ERROR] teacher onnx sha256 mismatch（D-20）: {h.hexdigest()[:16]}…")
+        sys.exit(7)
     providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
     sess = ort.InferenceSession(onnx_path, providers=providers)
     inp_name = sess.get_inputs()[0].name
@@ -131,13 +154,34 @@ def eval_model(model, dataset, device, batch_size=256):
             feats[i:end] = model.get_embedding(t).cpu().numpy()
     labels = np.array(dataset.labels)
     norms = np.linalg.norm(feats, axis=1) + 1e-8
+    rng = np.random.RandomState(0)
+    by_id = {}
+    for idx, lab in enumerate(labels):
+        by_id.setdefault(int(lab), []).append(idx)
+    ids_list = sorted(by_id.keys())
+    pos_pairs = []
+    for lab in ids_list:
+        idxs = by_id[lab]
+        if len(idxs) < 2:
+            continue
+        n_pos_per_id = min(len(idxs) * (len(idxs) - 1) // 2, 10)
+        for _ in range(n_pos_per_id):
+            a, b = rng.choice(idxs, 2, replace=False)
+            pos_pairs.append((int(a), int(b)))
+    n_pos = len(pos_pairs)
+    neg_pairs = []
+    while len(neg_pairs) < n_pos:
+        l1, l2 = rng.choice(len(ids_list), 2, replace=False)
+        if l1 == l2:
+            continue
+        a = int(rng.choice(by_id[ids_list[l1]]))
+        b = int(rng.choice(by_id[ids_list[l2]]))
+        neg_pairs.append((a, b))
     sims, same = [], []
-    n = len(feats)
-    for i in range(n):
-        for j in range(i + 1, min(i + 50, n)):
-            sim = np.dot(feats[i], feats[j]) / (norms[i] * norms[j])
-            sims.append(sim)
-            same.append(1 if labels[i] == labels[j] else 0)
+    for a, b in pos_pairs + neg_pairs:
+        sim = np.dot(feats[a], feats[b]) / (norms[a] * norms[b])
+        sims.append(sim)
+        same.append(1 if labels[a] == labels[b] else 0)
     sims, same = np.array(sims), np.array(same)
     auc = roc_auc_score(same, sims)
     best_acc = max(np.mean((sims >= t).astype(int) == same) for t in np.linspace(sims.min(), sims.max(), 300))
@@ -153,7 +197,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--save_dir", default="weights/ablation")
-    parser.add_argument("--teacher_cache", default="weights/ablation/teacher_feats.npy")
+    parser.add_argument("--teacher_cache", default="weights/ablation_casia/teacher_feats.npy")
     parser.add_argument("--configs", nargs="*", default=None, help="只跑指定配置（索引 0-5）")
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--resume", default=None, help="从 checkpoint 恢复（路径）")
