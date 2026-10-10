@@ -38,3 +38,7 @@ results/multiseed_lfw.json
 results/lfw_10fold_cfg4.json
 results/efficiency_cpu_*.txt
 results/pairs/
+
+# 用户来源未明的仓根双本（2026-10-10 登记 CONFLICTS §3，待确认；文件保留、仅不入库）
+/CONFLICTS.md
+/ELEVATION.md
