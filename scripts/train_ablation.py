@@ -205,6 +205,13 @@ def main():
     parser.add_argument("--warmup_epochs", type=int, default=2, help="warmup epoch 数")
     parser.add_argument("--optimizer", default="sgd", choices=["sgd", "adamw"], help="优化器")
     parser.add_argument("--seed", type=int, default=42, help="随机种子")
+    # —— Phase 3.2（PLAN:846-883）：臂因子 CLI 覆盖。--distill_start 语义 = 绝对 epoch（0-based）
+    #    （README/Methods 必须写明）；--eval_every 默认 0=关闭（S10/V2-3 前置条件）——
+    parser.add_argument("--distill_start", type=int, default=None,
+                        help="覆盖 ABLATION_CONFIGS 的 distill_start（绝对 epoch，0-based）")
+    parser.add_argument("--w_feat", type=float, default=None, help="覆盖蒸馏特征权重 λ")
+    parser.add_argument("--eval_every", type=int, default=0,
+                        help="训练中每 N epoch 自评一次；0=关闭（默认，S10/V2-3）")
     args = parser.parse_args()
 
     device = f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
@@ -221,6 +228,23 @@ def main():
 
     for idx, (cfg_name, params, desc) in enumerate(configs):
         orig_i = orig_indices[idx]
+        # —— Phase 3.2：CLI 覆盖注入 params（V2-1 致命修复：光加后缀不注入 = 臂静默跑成表值；
+        #    注入后单一来源=params，下游 w_feat/distill_start_epoch 全走 params）——
+        if args.distill_start is not None:
+            params = {**params, "distill_start": args.distill_start}
+        if args.w_feat is not None:
+            params = {**params, "w_feat": args.w_feat}
+        # 保存名带因子后缀（N1：任一非 None 即带 `_s<L>_l<W>`；训练/_ckpt_health/eval/G3-f
+        # 命名五处必须同用本字符串）：
+        suffix = "" if args.distill_start is None and args.w_feat is None else \
+                 f"_s{args.distill_start}_l{str(args.w_feat).replace('.', '')}"
+        save_name = f"cfg{orig_i}_seed{args.seed}{suffix}"
+        # V2-1 修正①：每臂把【实际生效】的 λ/start 打进日志（Phase 3.5 汇总机检 [ARM] 唯一源头；
+        # 断言在训练开跑前触发，违例臂不烧 GPU）：
+        print(f"[ARM] {save_name} w_feat={params['w_feat']} start={params['distill_start']} "
+              f"aug={params['use_aug']}")
+        assert params["w_feat"] == (args.w_feat if args.w_feat is not None else params["w_feat"]), \
+            "V2-1: --w_feat 未注入 params（臂会静默跑成表值）"
         tag = f"cfg{orig_i}_{desc.replace(' ', '').replace('+', '')}"
         print(f"\n{'='*60}")
         print(f"[{idx+1}/{len(configs)}] {desc} (model={cfg_name}, cfg{orig_i})")
@@ -252,7 +276,6 @@ def main():
             auc_v, acc_v, sep_v = eval_model(m, ds, dev)
             return {"auc": auc_v, "acc": acc_v, "sep": sep_v}
 
-        save_name = f"cfg{orig_i}_seed{args.seed}"
         t0 = time.time()
         resume_ckpt = args.resume if idx == 0 else None
         trainer.train(dl, teacher_feats, epochs=args.epochs, lr=args.lr,
@@ -262,7 +285,8 @@ def main():
                       warmup_epochs=args.warmup_epochs,
                       optimizer_type=args.optimizer,
                       distill_start_epoch=params["distill_start"],
-                      seed=args.seed, eval_fn=eval_wrapper)
+                      seed=args.seed, eval_fn=eval_wrapper,
+                      eval_every=args.eval_every)
         _assert_health(os.path.join(args.save_dir, f"{save_name}_final.pt"), args.epochs)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
