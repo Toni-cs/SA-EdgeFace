@@ -373,9 +373,11 @@ def evaluate_pairwise_folds(sims, labels, folds, n_folds=10):
 
     eer_idx = int(np.nanargmin(np.abs((1 - tpr) - fpr)))
     tar = {}
-    for far in (1e-3, 1e-4, 1e-6):
+    # 键名用稳定标签（"1e-3"），禁用 float-repr 拼键（f"{1e-3}"=="0.001"，与 main 装配
+    # 层索要的 tar@1e-3 不符 → KeyError；2026-10-15 CFP 真数据首跑发现，契约见 T5-17）
+    for far, lbl in ((1e-3, "1e-3"), (1e-4, "1e-4"), (1e-6, "1e-6")):
         k = int(np.searchsorted(fpr, far))
-        tar[f"tar@{far}"] = float(tpr[k]) if k < len(tpr) else 0.0
+        tar[f"tar@{lbl}"] = float(tpr[k]) if k < len(tpr) else 0.0
 
     return {
         "acc_cv": float(np.mean(fold_accs)),
