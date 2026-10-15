@@ -24,6 +24,7 @@ import cv2
 from qad_face.utils import imread_cn
 from qad_face.models.edgeface import DEFAULT_CONFIGS, build_edgeface
 from qad_face.train.distill import DistillTrainer
+from qad_face.train.losses import DISTILL_TYPES
 from qad_face.train.dataset import FaceClassDataset
 from qad_face.data.surveillance_aug import SurveillanceAugment
 from sklearn.metrics import roc_auc_score
@@ -212,7 +213,42 @@ def main():
     parser.add_argument("--w_feat", type=float, default=None, help="覆盖蒸馏特征权重 λ")
     parser.add_argument("--eval_every", type=int, default=0,
                         help="训练中每 N epoch 自评一次；0=关闭（默认，S10/V2-3）")
+    # —— v2.0 注册矩阵（prereg_v2_matrix §6 细则 1-3）：骨干 × 蒸馏类型 ——
+    parser.add_argument("--distill_type", default=None, choices=["d0", "d1", "d2", "d3", "d4"],
+                        help="v2.0 注册蒸馏因子；给定后蒸馏语义由其接管（与 --w_feat/--w_rel 互斥）")
+    parser.add_argument("--backbone", default="shufflenet", choices=["shufflenet", "pconv"],
+                        help="T-R4 骨干开关（shufflenet=DWConv / pconv=PConv 替换）")
+    parser.add_argument("--lambda_max", type=float, default=0.1,
+                        help="d1-d4 全局蒸馏尺度 λ_max（细则 1：d1 与 d3 同 λ_max 锁 λ）")
+    parser.add_argument("--alpha", type=float, default=1.0,
+                        help="d4 质量条件化陡度 α（注册值 1.0）")
+    parser.add_argument("--rkd_d_weight", type=float, default=None,
+                        help="RKD-D 权重显式覆盖（默认按 distill_type 注册表）")
+    parser.add_argument("--rkd_a_weight", type=float, default=None,
+                        help="RKD-A 权重显式覆盖（默认按 distill_type 注册表）")
+    parser.add_argument("--n_triplets", type=int, default=4096,
+                        help="RKD-A 三元组采样上限/step（T-R3 卡：内存预算）")
+    parser.add_argument("--dt_seed", type=int, default=4242,
+                        help="D(t) 固定子集采样种子（跨臂恒定，与臂 seed 解耦）")
+    parser.add_argument("--dt_size", type=int, default=2000,
+                        help="D(t) 固定子集大小（D(t) 卡：2000 张）")
+    parser.add_argument("--dt_every", type=int, default=500,
+                        help="D(t) 步频；0=关闭")
     args = parser.parse_args()
+
+    # —— 单一来源纪律：distill_type 与 w_feat 覆盖互斥；d 路径必须显式 start/lr（P1 精神）——
+    if args.distill_type is not None and args.w_feat is not None:
+        print("[ERROR] --distill_type 与 --w_feat 互斥（蒸馏语义单一来源，禁双开关歧义）")
+        sys.exit(2)
+    if args.distill_type is not None and args.distill_start is None:
+        print("[ERROR] --distill_type 路径必须显式 --distill_start（禁默认依赖）")
+        sys.exit(2)
+    use_dt = args.distill_type is not None
+    dt_spec = DISTILL_TYPES[args.distill_type] if use_dt else None
+    rkd_d_eff = args.rkd_d_weight if args.rkd_d_weight is not None else (
+        dt_spec["rkd_d"] if use_dt else 0.0)
+    rkd_a_eff = args.rkd_a_weight if args.rkd_a_weight is not None else (
+        dt_spec["rkd_a"] if use_dt else 0.0)
 
     device = f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu"
     print(f"Device: {device}, CUDA: {torch.cuda.is_available()}")
@@ -234,15 +270,28 @@ def main():
             params = {**params, "distill_start": args.distill_start}
         if args.w_feat is not None:
             params = {**params, "w_feat": args.w_feat}
-        # 保存名带因子后缀（N1：任一非 None 即带 `_s<L>_l<W>`；训练/_ckpt_health/eval/G3-f
-        # 命名五处必须同用本字符串）：
-        suffix = "" if args.distill_start is None and args.w_feat is None else \
-                 f"_s{args.distill_start}_l{str(args.w_feat).replace('.', '')}"
+        if use_dt:
+            # 蒸馏语义由 distill_type 接管：w_feat/w_rel 归零（ABLATION_CONFIGS 表行不改，
+            # 真实语义走 [ARM] 的 distill_type/rkd_d/rkd_a/cond 字段）
+            params = {**params, "w_feat": 0.0, "w_rel": 0.0}
+        # 保存名带因子后缀（N1：训练/_ckpt_health/eval/G3-f 命名五处必须同用本字符串）：
+        if use_dt:
+            bb = "" if args.backbone == "shufflenet" else "_bbpconv"
+            suffix = f"_{args.distill_type}{bb}_s{args.distill_start}_l{str(args.lambda_max).replace('.', '')}"
+        else:
+            suffix = "" if args.distill_start is None and args.w_feat is None else \
+                     f"_s{args.distill_start}_l{str(args.w_feat).replace('.', '')}"
         save_name = f"cfg{orig_i}_seed{args.seed}{suffix}"
-        # V2-1 修正①：每臂把【实际生效】的 λ/start 打进日志（Phase 3.5 汇总机检 [ARM] 唯一源头；
+        # V2-1 修正①：每臂把【实际生效】的参数打进日志（Phase 3.5 汇总机检 [ARM] 唯一源头；
         # 断言在训练开跑前触发，违例臂不烧 GPU）：
-        print(f"[ARM] {save_name} w_feat={params['w_feat']} start={params['distill_start']} "
-              f"aug={params['use_aug']}")
+        if use_dt:
+            print(f"[ARM] {save_name} distill_type={args.distill_type} backbone={args.backbone} "
+                  f"lambda_max={args.lambda_max} alpha={args.alpha} "
+                  f"rkd_d={rkd_d_eff} rkd_a={rkd_a_eff} cond={int(dt_spec['cond'])} "
+                  f"lr={args.lr} start={params['distill_start']} aug={params['use_aug']} seed={args.seed}")
+        else:
+            print(f"[ARM] {save_name} w_feat={params['w_feat']} start={params['distill_start']} "
+                  f"aug={params['use_aug']}")
         assert params["w_feat"] == (args.w_feat if args.w_feat is not None else params["w_feat"]), \
             "V2-1: --w_feat 未注入 params（臂会静默跑成表值）"
         tag = f"cfg{orig_i}_{desc.replace(' ', '').replace('+', '')}"
@@ -258,11 +307,24 @@ def main():
                         persistent_workers=(nw > 0),
                         pin_memory=(device != "cpu"))
 
-        if params["w_feat"] > 0 or params["w_rel"] > 0:
+        # d0 也加载教师缓存：D(t) 插桩全臂覆盖（DG-R1(c) 统一适用 + d0 收敛曲线入档）；
+        # d0 的损失语义不变（DistillV2Loss d0 分支不消费 teacher_emb）
+        if params["w_feat"] > 0 or params["w_rel"] > 0 or use_dt:
             if teacher_feats is None:
                 teacher_feats = precompute_teacher_cache(ds, args.teacher_cache)
         else:
             teacher_feats = None
+
+        # D(t) 固定子集（D(t) 卡：从训练集采样 2000 张，seed 固定）：
+        # RandomState(dt_seed) 与臂 seed 解耦 → 跨臂同集可比
+        dt_idxs = dt_labels_t = None
+        if use_dt and args.dt_every > 0:
+            g_dt = np.random.RandomState(args.dt_seed)
+            sel = np.sort(g_dt.choice(len(ds), size=min(args.dt_size, len(ds)), replace=False))
+            dt_idxs = torch.from_numpy(sel.astype(np.int64))
+            dt_labels_t = torch.tensor([ds.labels[int(i)] for i in sel], dtype=torch.long)
+            print(f"[DT] fixed subset n={len(sel)} seed={args.dt_seed} every={args.dt_every} steps",
+                  flush=True)
 
         trainer = DistillTrainer(
             student_config=DEFAULT_CONFIGS[cfg_name],
@@ -270,6 +332,11 @@ def main():
             w_arc=1.0, w_feat=params["w_feat"], w_rel=params["w_rel"],
             feat_mode="cosine",
             seed=args.seed,
+            distill_type=args.distill_type,
+            lambda_max=args.lambda_max, alpha=args.alpha,
+            rkd_d_weight=rkd_d_eff, rkd_a_weight=rkd_a_eff,
+            n_triplets=args.n_triplets,
+            backbone_type=args.backbone,
         )
 
         def eval_wrapper(m, dev):
@@ -286,7 +353,8 @@ def main():
                       optimizer_type=args.optimizer,
                       distill_start_epoch=params["distill_start"],
                       seed=args.seed, eval_fn=eval_wrapper,
-                      eval_every=args.eval_every)
+                      eval_every=args.eval_every,
+                      dt_idxs=dt_idxs, dt_labels=dt_labels_t, dt_every=args.dt_every)
         _assert_health(os.path.join(args.save_dir, f"{save_name}_final.pt"), args.epochs)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)

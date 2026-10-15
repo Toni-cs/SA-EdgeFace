@@ -15,10 +15,11 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from ..models.edgeface import build_edgeface
-from .losses import ArcFaceLoss, DistillTotalLoss
+from .losses import ArcFaceLoss, DistillTotalLoss, DistillV2Loss
 from .dataset import build_train_dataset
 
 
@@ -57,10 +58,16 @@ class DistillTrainer:
 
     def __init__(self, student_config, num_classes, device="cuda",
                  w_arc=1.0, w_feat=0.1, w_rel=0.0, feat_mode="cosine",
-                 arc_s=30.0, arc_m=0.3, emb_dim=512, seed=None):
+                 arc_s=30.0, arc_m=0.3, emb_dim=512, seed=None,
+                 distill_type=None, lambda_max=0.1, alpha=1.0,
+                 rkd_d_weight=None, rkd_a_weight=None, n_triplets=4096,
+                 backbone_type="shufflenet"):
         """
         seed: 若提供，则在构建模型权重之前设置全局随机种子，保证初始化可复现。
               不传 seed 时保持 PyTorch 默认（不可复现，但兼容旧调用）。
+        distill_type: v2.0 注册因子 d0..d4（None = 旧路径 DistillTotalLoss，历史 B/E 复现语义不变）。
+        lambda_max/alpha: T-R2/T-R3 全局蒸馏尺度与质量条件化陡度（d1-d4 共用 λ_max 锁 λ）。
+        backbone_type: "shufflenet"/"pconv"（T-R4）。
         """
         import random
         if seed is not None:
@@ -69,11 +76,21 @@ class DistillTrainer:
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
         self.device = device
-        self.student = build_edgeface(student_config).to(device)
+        self.distill_type = distill_type
+        self.student = build_edgeface(student_config, backbone_type=backbone_type).to(device)
         self.arcface = ArcFaceLoss(emb_dim, num_classes, s=arc_s, m=arc_m).to(device)
-        self.criterion = DistillTotalLoss(
-            self.arcface, w_arc=w_arc, w_feat=w_feat, w_rel=w_rel, feat_mode=feat_mode
-        ).to(device)
+        if distill_type is not None:
+            self.criterion = DistillV2Loss(
+                self.arcface, distill_type,
+                lambda_max=lambda_max, alpha=alpha,
+                rkd_d_weight=rkd_d_weight, rkd_a_weight=rkd_a_weight,
+                n_triplets=n_triplets, w_arc=w_arc, feat_mode=feat_mode,
+                seed=0 if seed is None else int(seed),
+            ).to(device)
+        else:
+            self.criterion = DistillTotalLoss(
+                self.arcface, w_arc=w_arc, w_feat=w_feat, w_rel=w_rel, feat_mode=feat_mode
+            ).to(device)
         self.emb_dim = emb_dim
         self.eval_history = []
 
@@ -81,7 +98,8 @@ class DistillTrainer:
               weight_decay=5e-4, save_dir="weights/distill", save_name="student",
               log_every=50, use_amp=True, grad_clip=10.0, resume_from=None,
               warmup_epochs=2, optimizer_type="sgd", distill_start_epoch=0, seed=None,
-              eval_fn=None, eval_every=0):
+              eval_fn=None, eval_every=0,
+              dt_idxs=None, dt_labels=None, dt_every=500):
         """
         蒸馏训练。dataloader 需返回 (imgs, label, sample_idx)，
         teacher_features[sample_idx] 为对应教师 embedding。
@@ -94,6 +112,9 @@ class DistillTrainer:
             distill_start_epoch: 前 N 个 epoch 只用 ArcFace，之后再加蒸馏（避免早期梯度冲突）
             seed: 仅影响 DataLoader shuffle / 后续随机；模型初始化复现需在 __init__ 传 seed
         eval_fn: callable(model, device) -> dict；eval_every>0 时每 eval_every 个 epoch 调用一次（默认 0=训练中不 eval，训练末由调用方自评一次）
+        dt_idxs/dt_labels/dt_every: D(t) 插桩（D(t) 卡）——固定子集索引/标签 + 步频；
+            每 dt_every step 真实前向计算 D(t)=E[‖f_S−f_T‖²]、D_norm(t)=E[1−cos]、
+            类内/类间距离比 geo；曲线只来自真实日志，禁任何构造/平滑。
         """
         import random
         if seed is not None:
@@ -148,6 +169,7 @@ class DistillTrainer:
             use_distill = teacher_features is not None and epoch >= distill_start_epoch
             running = 0.0
             n = 0
+            g_ep = {"n": 0, "min": float("inf"), "max": 0.0, "sum": 0.0, "p25": 0.0, "p75": 0.0}
             for imgs, labels, idxs in dataloader:
                 imgs = imgs.to(self.device)
                 labels = labels.to(self.device)
@@ -182,6 +204,19 @@ class DistillTrainer:
                 running += loss.item() * imgs.size(0)
                 n += imgs.size(0)
                 global_step += 1
+                if "g_mean" in logs:                       # d4：λ_i 分布逐 step 累积（T-R2 #4）
+                    g_ep["n"] += 1
+                    g_ep["min"] = min(g_ep["min"], logs["g_min"])
+                    g_ep["max"] = max(g_ep["max"], logs["g_max"])
+                    g_ep["sum"] += logs["g_mean"]
+                    g_ep["p25"] += logs["g_p25"]
+                    g_ep["p75"] += logs["g_p75"]
+                if dt_idxs is not None and teacher_features is not None \
+                        and global_step % dt_every == 0:
+                    try:
+                        self._dt_eval(dataloader, teacher_features, dt_idxs, dt_labels, global_step)
+                    except Exception as e:
+                        print(f"  [Dt warn] {e}")
                 if global_step % log_every == 0:
                     extras = " ".join(f"{k}={v:.4f}" for k, v in logs.items() if k != "loss_total")
                     print(f"  [step {global_step}] total={loss.item():.4f} {extras}")
@@ -190,6 +225,10 @@ class DistillTrainer:
             print(f"[epoch {epoch+1}/{epochs}] avg_loss={avg:.4f} "
                   f"lr={scheduler.get_last_lr()[0]:.2e} time={time.time()-t0:.1f}s"
                   f"{f' nan_skipped={nan_skip_count}' if nan_skip_count else ''}")
+            if g_ep["n"] > 0:
+                print(f"  [lambda_i ep{epoch+1}] min={g_ep['min']:.4f} max={g_ep['max']:.4f} "
+                      f"mean={g_ep['sum']/g_ep['n']:.4f} p25={g_ep['p25']/g_ep['n']:.4f} "
+                      f"p75={g_ep['p75']/g_ep['n']:.4f} (g = λ_i/λ_max，T-R2 #4)", flush=True)
             self.eval_history.append({"epoch": epoch + 1, "avg_loss": avg})
             if eval_fn is not None and eval_every > 0 and (epoch + 1 - start_epoch) % eval_every == 0:
                 try:
@@ -210,6 +249,41 @@ class DistillTrainer:
         if not ok:
             raise RuntimeError(f"final checkpoint 被健康门拒绝保存: {save_dir}/{save_name}_final.pt")
         print(f"[done] final model saved to {save_dir}/{save_name}_final.pt")
+
+    @torch.no_grad()
+    def _dt_eval(self, dataloader, teacher_features, dt_idxs, dt_labels, step):
+        """D(t) 插桩：固定 2000 张子集（seed 固定，跨臂同集）真实前向。
+
+        D(t) = E[‖f_S^t − f_T‖²]（原始嵌入）；D_norm(t) = E[1 − cos(f_S, f_T)]；
+        geo = 类内/类间距离比（归一化嵌入上三角，按身份分组）。
+        曲线唯一来源 = 本函数的真实计算 + 训练日志（D(t) 卡红线：禁构造/平滑）。
+        """
+        ds = dataloader.dataset
+        self.student.eval()
+        try:
+            zs_list = []
+            idxs_cpu = dt_idxs.cpu()
+            for s0 in range(0, len(idxs_cpu), 256):
+                batch = [ds[int(i)][0] for i in idxs_cpu[s0:s0 + 256]]
+                imgs = torch.stack(batch).to(self.device)
+                zs_list.append(self.student(imgs).float())
+            zs = torch.cat(zs_list, 0)
+            zt = teacher_features[dt_idxs.to(self.device)].float()
+            d = float(((zs - zt) ** 2).sum(dim=1).mean())
+            d_norm = float((1.0 - F.cosine_similarity(zs, zt, dim=1)).mean())
+            zn = F.normalize(zs, dim=1)
+            Bn = zn.size(0)
+            iu = torch.triu_indices(Bn, Bn, offset=1, device=zn.device)
+            dvec = torch.cdist(zn, zn)[iu[0], iu[1]]
+            lab = dt_labels.to(self.device)
+            same = (lab.view(-1, 1) == lab.view(1, -1))[iu[0], iu[1]]
+            within = float(dvec[same].mean()) if bool(same.any()) else float("nan")
+            between = float(dvec[~same].mean()) if bool((~same).any()) else float("nan")
+            geo = within / between if between > 0 else float("nan")
+            print(f"  [Dt step {step}] D={d:.4f} D_norm={d_norm:.4f} "
+                  f"geo={geo:.4f} within={within:.4f} between={between:.4f}", flush=True)
+        finally:
+            self.student.train()
 
     def save(self, path, optimizer=None, scheduler=None, epoch=None, train_loss=None):
         if optimizer is not None and scheduler is not None:

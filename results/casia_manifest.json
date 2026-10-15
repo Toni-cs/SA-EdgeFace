@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "date": "2026-10-15",
+    "script": "scripts/_casia_manifest.py",
+    "script_sha256": "2c4b4578e9259c05c53428733064cae961d756488e84ff38dce26a638305dc98",
+    "root": "datasets/raw/casia-webface",
+    "scope": "*.jpg（目录升序、文件升序、relpath / 分隔）",
+    "stream_format": {
+      "listing_sha256": "sha256 over `relpath\\tsize\\n` 逐行",
+      "manifest_sha256": "sha256 over `relpath\\tsize\\tsha256(file)\\n` 逐行 = **pin 4 hash**"
+    },
+    "purpose": "prereg_v2_matrix pin 4 + 首臂前 commit 清单第 6 项；复算 = `python scripts/_casia_manifest.py --verify`",
+    "gpu": false
+  },
+  "counts": {
+    "identity_dirs": 10572,
+    "jpg_files": 490623,
+    "total_bytes": 2708917180
+  },
+  "hashes": {
+    "listing_sha256": "3b59f8e677ba1bcbfab1650eb65e8b9699d7176b433d615c74d9dff271ba0ee8",
+    "manifest_sha256": "07a6f7daf1cc0946913a78be5289e703f547e59e02f882a36f610881aca03ffd"
+  },
+  "cross_evidence": {
+    "jpg_files == 点数 490623 (D-27, 2026-10-14)": true,
+    "jpg_files == teacher_feats 行数 490623": true,
+    "identity_dirs == 10572 (审计 L0, 2026-10-15)": true
+  },
+  "samples_first_last": [
+    {
+      "rel": "000000/00000001.jpg",
+      "size": 4791,
+      "sha256": "3449dcaffd10ae77f802c70468648194855a91db62ae0bf5e885bbcd18cf0973"
+    },
+    {
+      "rel": "000000/00000002.jpg",
+      "size": 4575,
+      "sha256": "4f64219bdcfeca1a03af8e98859edbc33383f9a3ba7be4aaf68e9b49dae16cd9"
+    },
+    {
+      "rel": "000000/00000003.jpg",
+      "size": 5980,
+      "sha256": "6a4fbf5ba35e18974a4753967093916d7161a8f5b1f4397c8a9d54c3158bd74d"
+    },
+    {
+      "rel": "010571/00490621.jpg",
+      "size": 4989,
+      "sha256": "8886185bd1ee8403ec8fd4d731c8d59373df46f613074408fd5e8e6b16e21abd"
+    },
+    {
+      "rel": "010571/00490622.jpg",
+      "size": 5849,
+      "sha256": "bd3ead6091a81bd58538e44bcd085f8b68f187eb85314cef105d9d7de289c8a5"
+    },
+    {
+      "rel": "010571/00490623.jpg",
+      "size": 5384,
+      "sha256": "eba82357d16d16183231f5af9ee637c75f904c3195832d090632b43ec0b8b424"
+    }
+  ],
+  "elapsed_sec": 720.4
+}

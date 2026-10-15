@@ -26,6 +26,8 @@ def main():
     parser.add_argument("--ckpt", type=str, default=None, help="checkpoint 路径（默认 weights/ablation_casia/<save_name>_final.pt）")
     parser.add_argument("--out", type=str, default=None, help="输出 json（默认 results/lfw_10fold_cfgN.json；已存在则拒绝覆盖）")
     parser.add_argument("--arch", choices=["edgeface", "mobilefacenet"], default=None, help="模型架构；--ckpt 指向 mbf 臂时必须显式指定")
+    parser.add_argument("--backbone", choices=["shufflenet", "pconv"], default="shufflenet",
+                        help="T-R4 骨干开关（pconv 臂评测必须与训练侧一致，否则 state_dict 错配）")
     args = parser.parse_args()
     base = os.path.basename(args.ckpt or "").lower()
     if (("mbf" in base) or ("mobilefacenet" in base)) and args.arch != "mobilefacenet":
@@ -65,7 +67,7 @@ def main():
     print(f"  loaded {len(imgs_cache)}/{len(needed)}")
 
     ckpt_path = args.ckpt if args.ckpt else os.path.join(SAVE_DIR, f"{save_name}_final.pt")
-    model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
+    model = build_edgeface(DEFAULT_CONFIGS[cfg_name], backbone_type=args.backbone).to(device)
     ckpt = torch.load(ckpt_path, map_location=device)
     model.load_state_dict(ckpt["student"], strict=False)
     model.eval()

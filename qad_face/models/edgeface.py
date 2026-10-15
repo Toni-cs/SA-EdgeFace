@@ -20,13 +20,16 @@ class EdgeFace(nn.Module):
     """EdgeFace：轻量人脸识别模型，可选集成 SAB（C1）。"""
 
     def __init__(self, width_mult=1.0, emb_dim=512, use_sab=True,
-                 sab_stages=(3, 4), sab_config=None, dropout=0.0):
+                 sab_stages=(3, 4), sab_config=None, dropout=0.0,
+                 backbone_type="shufflenet"):
         super().__init__()
+        self.backbone_type = backbone_type
         self.backbone = ShuffleNetV2(
             width_mult=width_mult,
             sab_stages=sab_stages,
             sab_config=sab_config,
             use_sab=use_sab,
+            backbone=backbone_type,
         )
         self.emb_dim = emb_dim
         self.dropout = nn.Dropout(dropout) if dropout > 0 else nn.Identity()
@@ -45,7 +48,7 @@ class EdgeFace(nn.Module):
         return self.forward(x, normalize=True)
 
 
-def build_edgeface(config=None):
+def build_edgeface(config=None, backbone_type="shufflenet"):
     """
     根据配置 dict 构建 EdgeFace。
 
@@ -56,6 +59,7 @@ def build_edgeface(config=None):
         sab_stages: 默认 (3,4)
         sab_config: SAB 子分支开关 {use_channel, use_spatial, use_detail, alpha_init}
         dropout: 默认 0.0
+        backbone_type: "shufflenet"/"pconv"（显式参数优先于 config key）
     """
     c = config or {}
     return EdgeFace(
@@ -65,6 +69,7 @@ def build_edgeface(config=None):
         sab_stages=tuple(c.get("sab_stages", (3, 4))),
         sab_config=c.get("sab_config", None),
         dropout=c.get("dropout", 0.0),
+        backbone_type=backbone_type if backbone_type is not None else c.get("backbone_type", "shufflenet"),
     )
 
 
@@ -83,8 +88,8 @@ DEFAULT_CONFIGS = {
 }
 
 
-def build_by_name(name):
-    """按预设名构建，用于实验脚本。"""
+def build_by_name(name, backbone_type="shufflenet"):
+    """按预设名构建，用于实验脚本。backbone_type: "shufflenet"/"pconv"（T-R4）。"""
     if name not in DEFAULT_CONFIGS:
         raise ValueError(f"Unknown config {name}, choose from {list(DEFAULT_CONFIGS)}")
-    return build_edgeface(DEFAULT_CONFIGS[name])
+    return build_edgeface(DEFAULT_CONFIGS[name], backbone_type=backbone_type)
