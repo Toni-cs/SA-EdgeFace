@@ -622,6 +622,9 @@ def main():
     import torch
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     backend, obj, model_path = build_backend(args, device)
+    if backend == "onnx":
+        # D-34③义务三（P4 2026-10-15 钉死）：JSON device 须为实测后端，禁照抄 torch 判定
+        device = obj.get_providers()[0]
     cache = extract_embeddings(paths, (backend, obj), args.batch, device)
     print(f"[embed] {len(cache)} 特征就绪（{backend}）", flush=True)
 
