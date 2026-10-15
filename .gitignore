@@ -42,3 +42,9 @@ results/pairs/
 # 用户来源未明的仓根双本（2026-10-10 登记 CONFLICTS §3，待确认；文件保留、仅不入库）
 /CONFLICTS.md
 /ELEVATION.md
+
+# 仓根异物与训练日志目录（2026-10-15 登记 CONFLICTS D-33⑩：gitignore+用户确认，单独 commit；文件不删不改不动字节）
+/10.11更新.md
+/logs/
+/logs_phase3/
+/logs_pilot/
