@@ -307,3 +307,18 @@ for N, ncell in [(20,2),(30,3)]:
     coef = (tc+tp)*(2/ncell)**0.5
     print(N, df, f"{tc:.4f} {tp:.4f} coef={coef:.4f} CFP={coef*1.0:.2f}pp TF={coef*2.5:.2f}pp")
 ```
+
+## 22. amendment（2026-10-15，AMD-V2-1——distill_start 注册空洞收口，CONFLICTS D-31③ → D-33③；P4 终审庭终稿，指挥官照录；本节只增行，§1–§21 与文末复现命令一字未动）
+
+- §6 因子空间补全：本矩阵全部蒸馏臂（D1/D2/D3/D4 各 cell）固定 `--distill_start 20`；D0（无蒸馏）不适用。该值取自 cfg4/B 锚点/pilot 已验证谱系，于任何学生臂开跑前事前固定；start 非本矩阵因子，主族不作任何 start 相关主张（成熟度维度由理论曲线臂承载，start ∈ {0,10,20} 各 1 seed，族外）。驱动侧一律显式传值（S1-S17 覆盖），显式传值义务以本行为准。关闭 CONFLICTS D-31③ 注册空洞。
+
+## 23. amendment（2026-10-15，AMD-V2-2——§7 零记录条款范围澄清 + 教师侧件族披露 + DG-R0a 校准权重条款，CONFLICTS D-32 → D-33⑥；P4 终审庭终稿，指挥官照录；本节只增行，上文各节一字未动）
+
+- §7 零记录条款范围澄清（事实与证据口径不变）：「零评测记录」确指【本项目学生模型】在 CFP-FP / TinyFace / AgeDB-30 上的评测记录为零（证据 = §7 既载 `results/` + `logs*/` 全量 grep，2026-10-14 实测）；【教师侧已发表模型校准件】除外，披露如下：`weights/models/buffalo_s/` 存在 w600k_mbf（已发表权重）+ det_500m 检测的四基准件族——`CFPW_sims.csv`（13,914 对；FF 3500/3500 = CFP 官方全集，FP 3460/3454 = 检测掉 86 对；字段 file1,file2,protocol,pair_type,cos_sim）、`CFPW_metrics.json`（roc_auc=0.9977、images=6905）、CALFW/CPLFW/LFW 同族件；mtime 2026-09-14，早于本件冻结；谱系自 PLAN_v1:701 起登记教师列，不得代替学生列；该件族不得用于任何主假设相关计算。上述事实不改变 4 主假设族成立所依赖的学生侧零记录前提。
+- DG-R0a 校准权重条款：判据原文「已发表模型校准一致」中「AdaFace 官方权重」为举例；备选 w600k_mbf 合格，须同时满足：① 权重来源与哈希登记于校准证据件；② 校准锚 = 外部已发表数值（同基准同协议，引文登记于校准证据 json）；③ 容差事前写死：同协议下与已发表数值差 ≤ 0.5pp 判一致，超带 = FAIL = 修管线；④ 反自指：2026-09-14 本地四基准件族不得作为校准锚，仅作回归基线并随证据披露。
+
+## 24. amendment（2026-10-15，AMD-V2-3——冻结件失实行更正 + 驱动登记 + 通道指针笔误归置，CONFLICTS D-33⑧/⑩；P4 终审庭终稿，指挥官照录；本节只增行，上文各节一字未动）
+
+- §15-1（pin 1 行）状态更正：其「待：四实现与 gate_check.py 均未落盘（`gate_check.py` Test-Path=False 实测）；冻结时填实值」已于冻结 commit de13df9（2026-10-15）失实——T-R2/R3/R4/R5 全件 + `gate_check.py` + 单测件 48/48（`results/_unit_tests_20261015.txt`）+ S1-S17（`results/_selftest_20261015.txt`）+ 冒烟 PASS10/FAIL0/PENDING29 exit 1（`results/_gate_check_smoke_20261015.json`）均已入库/落盘；代码冻结 HEAD = de13df9。§18-3（commit 清单第 3 行）状态同步更正：「待（随 pin 1）」→ 实值同上，以 de13df9 为准。§19 门表为冻结时点快照、不改；P3 现状（条件全绿，本节落笔即全绿）以本 amendment 与 CONFLICTS 完成行为准。
+- 驱动登记：`scripts/_phase3_run.py` 属 .gitignore `scripts/_*` 仓外件，无 HEAD 哈希，以 sha256 = fc0ee4cfd339d3577215fbc19d9681f34f2199165e93141cbaf5ba18dc59de9a 为唯一完整性锚；义务条款：驱动每次 `--run` 启动时自校验该 sha256，不符即拒绝执行（实现并入 S 套件，下次自测报告留证）。填入后本值即定稿，此后变更须新 amendment。
+- §15-4（pin 4 行）尾句指针笔误更正（归置自 CONFLICTS D-33⑩；原裁「登记不改文」，现并入本 errata 件——同类更正边际成本为零，冻结件不留已知假指针，不单列新通道）：「通道条款成文见 §16.1」应为「通道条款成文见 §16.2」。§16.1 = amendment 规则，§16.2 = 揭盲前评测集 hash 通道条款（正文本体）。
