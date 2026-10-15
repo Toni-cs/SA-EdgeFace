@@ -496,6 +496,22 @@ def t_r5():
                 and eg.make_config_hash(cfg_a) != eg.make_config_hash(cfg_c)
                 and len(eg.make_config_hash(cfg_a)) == 64)
         check("T5-16 config_hash 确定性 + 清单敏感性（sha256）", ok16)
+
+        # T5-17 pairwise 输出契约锁（2026-10-15 CFP 真数据首跑发现：tar 键曾以 float-repr
+        # 拼键（f"{1e-3}"=="0.001"）→ main 装配层 KeyError。契约：① 稳定标签键
+        # tar@1e-3/1e-4/1e-6；② 全文件消费侧 res["…"] 字面量 ⊆ 产出键集；③ 不得回退浮点拼键）
+        r17 = eg.evaluate_pairwise_folds(np.array(sims), np.array(labels), np.array(folds))
+        r17r = eg.rank1_accuracy(np.array([[0.9, 0.1], [0.1, 0.9]]), [0, 1], [0, 1])
+        import io as _io, re as _re
+        with _io.open(eg.__file__, encoding="utf-8") as _f:
+            _src17 = _f.read()
+        _used17 = set(_re.findall(r'res\["([^"]+)"\]', _src17))
+        _allowed17 = set(r17.keys()) | set(r17r.keys())
+        ok17 = ({"tar@1e-3", "tar@1e-4", "tar@1e-6"} <= set(r17.keys())
+                and _used17 <= _allowed17
+                and "tar@0.001" not in r17 and "tar@0.0001" not in r17)
+        check("T5-17 pairwise 契约锁（稳定 tar 键 + res 字面量 ⊆ 产出键）", ok17,
+              f"missing={sorted(_used17 - _allowed17)}")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
