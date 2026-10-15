@@ -505,13 +505,140 @@ def t_r5():
         import io as _io, re as _re
         with _io.open(eg.__file__, encoding="utf-8") as _f:
             _src17 = _f.read()
-        _used17 = set(_re.findall(r'res\["([^"]+)"\]', _src17))
+        _used17 = (set(_re.findall(r'res\["([^"]+)"\]', _src17))
+                   | set(_re.findall(r"res\['([^']+)'\]", _src17)))
         _allowed17 = set(r17.keys()) | set(r17r.keys())
         ok17 = ({"tar@1e-3", "tar@1e-4", "tar@1e-6"} <= set(r17.keys())
                 and _used17 <= _allowed17
-                and "tar@0.001" not in r17 and "tar@0.0001" not in r17)
+                and "tar@0.001" not in r17 and "tar@0.0001" not in r17
+                and "tar@1e-06" not in r17)
         check("T5-17 pairwise 契约锁（稳定 tar 键 + res 字面量 ⊆ 产出键）", ok17,
               f"missing={sorted(_used17 - _allowed17)}")
+
+        # T5-18 tar 值语义锁（P4 D-34-A 义务①，2026-10-15）：稳定标签与数值解耦后，
+        # (far, lbl) 元组人工配对存在错位风险（旧 f-string 由构造免疫）。契约：
+        # 逐 far 断言 tar[f"tar@{lbl}"] == searchsorted(fpr, far) 处 tpr（独立复算，精确相等）
+        s18 = np.array([0.9 - 0.01 * (i % 10) for i in range(10)]
+                       + [0.1 + 0.01 * (i % 10) for i in range(10)])
+        l18 = np.array([1] * 10 + [0] * 10)
+        f18 = np.array([i for i in range(10)] * 2)
+        r18 = eg.evaluate_pairwise_folds(s18, l18, f18)
+        fpr18, tpr18, _t18 = eg.roc_curve(l18, s18)
+        ok18 = True
+        detail18 = []
+        for far, lbl in ((1e-3, "1e-3"), (1e-4, "1e-4"), (1e-6, "1e-6")):
+            k = int(np.searchsorted(fpr18, far))
+            exp = float(tpr18[k]) if k < len(tpr18) else 0.0
+            got = r18[f"tar@{lbl}"]
+            if got != exp:
+                ok18 = False
+                detail18.append(f"{lbl}:{got}!={exp}")
+        check("T5-18 tar 值语义锁（逐 far 独立复算精确等，堵值-标签错配）", ok18,
+              ";".join(detail18))
+
+        # ---------- T5-19/T5-20 fiducial 对齐（prepare_benchmarks，D-35 配套）----------
+        spec19 = importlib.util.spec_from_file_location(
+            "prepare_benchmarks", os.path.join(ROOT, "scripts", "prepare_benchmarks.py"))
+        pb19 = importlib.util.module_from_spec(spec19)
+        spec19.loader.exec_module(pb19)
+
+        def _mkpts(eye_c, nose_c, m_l, m_r, ear_c=None, chin_c=None):
+            p = np.zeros((30, 2), dtype=np.float64)
+            ex, ey = eye_c
+            ring = [(ex - 12, ey), (ex - 8, ey - 6), (ex + 8, ey - 6),
+                    (ex + 12, ey), (ex + 8, ey + 5), (ex - 8, ey + 5)]
+            p[12:18] = ring                       # 13-18 眼环
+            p[21] = nose_c                        # 22 梁底
+            p[22] = (nose_c[0] + 6, nose_c[1] + 4)   # 23 右翼
+            p[23] = (nose_c[0], nose_c[1] + 5)       # 24 中
+            p[24] = (nose_c[0] - 6, nose_c[1] + 4)   # 25 左翼
+            p[25] = m_l                           # 26 左口角
+            p[27] = m_r                           # 28 右口角
+            # 轮廓点 1/9（1-indexed）：耳端/下颌端——profile 判向主判据
+            p[0] = ear_c if ear_c is not None else (ex - 40, ey - 10)
+            p[8] = chin_c if chin_c is not None else (ex + 40, ey + 60)
+            return p
+
+        pts_f = _mkpts((50, 80), (75, 120), (60, 138), (84, 137))
+        eye19, nose19, mouth19, slot19 = pb19.fiducial_features(pts_f, "frontal")
+        ok19 = (np.allclose(eye19, pts_f[12:18].mean(axis=0))
+                and np.allclose(nose19, pts_f[21:25].mean(axis=0))
+                and np.allclose(mouth19, (pts_f[25] + pts_f[27]) / 2.0)
+                and slot19 == "L")
+        # profile 判向（V2 契约，D-35-pre）：主判据 = 轮廓 x9−x1（下颌-耳端）
+        # pts_f 默认耳西颌东 → 朝右 = L；pts_l 耳东颌西 → 朝左 = R
+        _, nose_r, _, slot_pr = pb19.fiducial_features(pts_f, "profile")
+        pts_l = _mkpts((100, 80), (60, 120), (55, 138), (79, 137),
+                       ear_c=(140, 70), chin_c=(60, 140))
+        _, nose_l, _, slot_pl = pb19.fiducial_features(pts_l, "profile")
+        # 临界翻转锁：鼻心略西（旧 sign(鼻−眼) 会判 R）但下颌东 → 新判据必须 L
+        pts_bd = _mkpts((50, 80), (47, 120), (60, 138), (84, 137),
+                        ear_c=(20, 70), chin_c=(90, 140))
+        _, _, _, slot_bd = pb19.fiducial_features(pts_bd, "profile")
+        ok19 = ok19 and slot_pr == "L" and slot_pl == "R" and slot_bd == "L"
+        # Umeyama 精确性：已知相似（s=2, θ=30°, t=(5,7)）往返精确；无反射（det R>0）
+        th, s_u, t_u = np.deg2rad(30.0), 2.0, np.array([5.0, 7.0])
+        R_u = np.array([[np.cos(th), -np.sin(th)], [np.sin(th), np.cos(th)]])
+        src_u = np.array([[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]])
+        dst_u = (s_u * (src_u @ R_u.T)) + t_u
+        M_u = pb19.umeyama_similarity(src_u, dst_u)
+        fit_u = (src_u @ M_u[:, :2].T) + M_u[:, 2]
+        det_u = float(np.linalg.det(M_u[:, :2]))
+        ok19 = ok19 and np.allclose(fit_u, dst_u, atol=1e-9) and det_u > 0
+        check("T5-19 fiducial 特征/槽位（判向=轮廓下颌-耳端+临界翻转锁）/Umeyama（30 点 schema + 无反射锁）", ok19,
+              f"slot_f={slot19} slot_pr={slot_pr} slot_pl={slot_pl} slot_bd={slot_bd} det={det_u:.3f}")
+
+        # T5-20 端到端：合成图+合成标注 → 112×112 确定性；标注缺失 → None（兜底契约）；
+        # cfp_fp 默认口径不漂移（fiducial 仅显式 --mode 激活）
+        img20 = np.tile(np.arange(151, dtype=np.uint8), (189, 1))[:, :, None].repeat(3, axis=2)
+        fid20 = os.path.join(tmp, "fid_01.txt")
+        with open(fid20, "w", encoding="utf-8") as f:
+            for xy in pts_f:
+                f.write(f"{xy[0]},{xy[1]}\n")
+        out20a = pb19.align_fiducial(img20.copy(), fid20, "frontal")
+        out20b = pb19.align_fiducial(img20.copy(), fid20, "frontal")
+        ok20 = (out20a is not None and out20a.shape == (112, 112, 3)
+                and np.array_equal(out20a, out20b)
+                and pb19.align_fiducial(img20, os.path.join(tmp, "nope.txt"),
+                                        "frontal") is None
+                and pb19.DEFAULTS["cfp_fp"]["mode"] == "detect")
+        check("T5-20 fiducial 端到端（确定性 + 缺标注兜底 + 默认口径不漂移）", ok20,
+              f"shape={None if out20a is None else out20a.shape}")
+
+        # T5-21 profile 2 点契约（D-35 V2）：合成 profile 图三色斑
+        # （眼蓝/鼻绿/口品红）+ 判向=耳东颌西→R 槽。对齐输出必须：
+        #   ① 模板眼位采样=蓝、模板口心采样=品红（2 点精确落位）
+        #   ② 模板鼻位采样≠绿（鼻点被剔出拟合；若仍 3 点拟合，鼻斑会
+        #      被拉到 TPL_NOSE 邻域而呈绿色 → 本锁失败）
+        img21 = np.full((151, 189, 3), 96, dtype=np.uint8)
+        cv2.circle(img21, (50, 80), 6, (255, 0, 0), -1)    # 眼心=蓝
+        cv2.circle(img21, (30, 110), 6, (0, 255, 0), -1)   # 鼻点=绿
+        cv2.circle(img21, (72, 137), 6, (255, 0, 255), -1)  # 口心=品红
+        pts21 = _mkpts((50, 80), (30, 110), (66, 137), (78, 137),
+                       ear_c=(90, 60), chin_c=(10, 150))
+        fid21 = os.path.join(tmp, "fid_profile.txt")
+        with open(fid21, "w", encoding="utf-8") as f:
+            for xy in pts21:
+                f.write(f"{xy[0]},{xy[1]}\n")
+        out21 = pb19.align_fiducial(img21.copy(), fid21, "profile")
+        ok21 = (out21 is not None and out21.shape == (112, 112, 3)
+                and np.array_equal(out21, pb19.align_fiducial(img21.copy(), fid21,
+                                                              "profile")))
+        if ok21:
+            def _near(px, py, rgb, tol=10):
+                return bool(np.max(np.abs(
+                    out21[py, px].astype(int) - np.array(rgb))) <= tol)
+            ex21 = int(round(pb19.TPL_EYE_R[0]))
+            ey21 = int(round(pb19.TPL_EYE_R[1]))
+            mx21 = int(round(pb19.TPL_MOUTH_C[0]))
+            my21 = int(round(pb19.TPL_MOUTH_C[1]))
+            nx21 = int(round(pb19.TPL_NOSE[0]))
+            ny21 = int(round(pb19.TPL_NOSE[1]))
+            ok21 = (_near(ex21, ey21, (255, 0, 0))
+                    and _near(mx21, my21, (255, 0, 255))
+                    and not _near(nx21, ny21, (0, 255, 0), tol=60))
+        check("T5-21 profile 2 点契约（眼/口精确落模板 + 鼻点剔出拟合锁）", ok21,
+              f"shape={None if out21 is None else out21.shape}")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
