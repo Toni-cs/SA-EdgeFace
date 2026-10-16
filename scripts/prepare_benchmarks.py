@@ -64,8 +64,8 @@ def build_detector():
 
 # ---- fiducial 对齐（CFP 官方 30 点标注；schema 2026-10-15 坐标级锁定，D-35）----
 # 13-18 眼环（13外/14,15上/16内/17,18下）→ 眼心=centroid；22-25 鼻（22梁底+翼）
-# → 鼻点=centroid；26/28 口角 → 口心=中点；槽位：正面=像左槽；profile 按鼻点.x
-# 相对眼心.x 判向（鼻朝右=见其右侧=其右眼=正位照中居像左=L槽；解剖×三角双推导）。
+# → 鼻点=centroid；26/28 口角 → 口心=中点；槽位：正面=像左槽；profile 判向=V2 轮廓 x9−x1（实现见 fiducial_features docstring）
+# （下颌端点9 − 耳端点1）。V1 旧判（鼻点.x−眼心.x + 解剖×三角双推导）从未提交入库（git log -S fiducial：aab286a~1 无 fiducial 模式；旧语义出处=本件 :99 一致率句 + D-35-pre/D-35 登记）。
 TPL_EYE_L = (38.2946, 51.6963)     # ArcFace 112 模板（与 insightface norm_crop 同源）
 TPL_EYE_R = (73.5318, 51.5014)
 TPL_NOSE = (56.0252, 71.7366)
