@@ -98,3 +98,28 @@
    - 照实披露：臂 1 的 LFW/AgeDB 评测栈无 flip-TTA、无 L2 行归一；诊断腿为统一镜像栈，校准值与臂 1 值之差异同时含对齐+协议两变量；判据只对锚带、不对臂 1。
 3. **执行顺序（用户指令字面，覆盖 §4 隐含的两腿并列）**：漏检统计落册 → LFW 诊断腿 → AgeDB 诊断腿 → CFP-FP 腿 → TinyFace 腿。
 4. **配套实现件跑前纠错（0 张产出、判据零动，照 D-52 先例）**：`_eval_cfp_mirror_v1.py` v1 草稿误置 AdaFace IR-101 为评测模型——与 CFP 锚 98.00（AMD-V2-2 buffalo_s 行）及臂 1 实值 95.5429（w600k_mbf.onnx）不同件，判据失义；开跑前审出，纠正为 w600k_mbf.onnx + egp._preprocess（≡臂 1 栈）。§4 判据字面零动。新 sha 登记 D-53。
+
+## §8 修订 A2（2026-10-17 18:41 +08:00 追加；带时间戳 amendment，§1-A1 冻结字面不动）
+
+> 授权依据：用户 2026-10-17 平台指令（问答照录，CONFLICTS D-55）：「v2 重跑授权（附 D-55）：1. 定性：48.93% 为仪器病灶产物（配对全灭→随机水平，定量吻合），非镜像栈真实测量。v2 = 新候选（三新 sha），按 A2 冻结后跑；红线『新预注册+用户重新授权』两项均满足，本条即授权。2. v1 件与 FIDELITY_FAIL(v1) 原样留册不覆盖（已照拒覆盖红线执行）。3. 一锤封口：v2 是唯一重跑。v2 再 FAIL = 真实保真失败，照册收口，不进入第三次仪器修复循环（须回 user+P4）。4. 门限不动：LFW 99.70±0.5 锚带照旧。」；金丝雀条款（同指令）：「evaluate() 跑分前 30 秒预检：金丝雀两测：① 全同嵌入喂入 → 必须精确 100%（配对正确性的充分证明）② 随机嵌入喂入 → 必须落在 50%±2%（判别力健全）任一不过 → 拒绝出数，仪器回修」。
+
+1. **v1 事实照录**：LFW 校准腿 v1（2026-10-17 13:15:09）出数 48.9333%（十折 48.00-51.00，恰随机水平），按 §7-A1 字面判 **FIDELITY_FAIL(v1)**；件 = `results/lfw_mirror_calib_20261017_v1.json` 拒覆盖原样留册（commit `861b4c3` 入库）。定性：**仪器病灶产物、非镜像栈真实测量值**。
+2. **病灶定谳（A1 预案「回滚排查移植代码」执行完毕；官方源码 + 静态证明）**：
+   - 官方铁证：CVLface@308142aa `verification.py:188-192` evaluate() 对整块 embeddings 取 `embeddings[0::2]`/`[1::2]`——只对交错布局（行 2i=第一图、行 2i+1=第二图）成立；`verification_evaluator.py:104` `collection['is_same'].numpy()[::2]`（按图存标签取步长 2）佐证交错。
+   - 病灶：三件移植评测用 `np.concatenate([e1,e2],axis=0)` 造**堆叠**布局再套同一习语 → 6,000 对配对全灭 → 必然随机水平，与观测 48.9333% 定量吻合。
+   - numpy 静态证明：堆叠布局下 e1n[0]=normalize(e1[0]) 而 e2n[0]=normalize(e1[1])（配对错位）；交错布局修复后 e1n==normalize(e1)、e2n==normalize(e2) 逐行 True。
+   - 波及面权威全扫（Python os.walk，无视 gitignore 对 `_` 前缀件的遮蔽）：`def calculate_roc` 全仓唯一定义 = `_eval_cfp_mirror_v1.py`（校准件同源 import 零复制，**无第四副本**）；`[0::2]` 习语仅两 mirror 件。三件同源病灶：校准件（已跑出假数）、CFP 件（未跑、0 产出截获）、TinyFace 件（另处：函数返回 (3,) 被调用方误绑 `hits` 再 `.mean(axis=0)` → 三 rank 塌缩标量 → `zip` 必崩白烧 GPU——未跑、截获）。
+3. **仪器修复收口（判据/协议/模型/锚/门限零动；仅修配对布局与返回值绑定 + 金丝雀增强）**。冻结 sha（三级链：D-53 跑前纠错态 → D-55 配对修复态 `fc810a32…`/`ffa328bd…`/`4eede864…` → A2 终版）：
+   - `_eval_calib_mirror_v1.py` = `c2678196c2700f4204c359c2fac9531abd9b08ec3fc52e5275c9e8720bce419e`
+   - `_eval_cfp_mirror_v1.py` = `2492ab776381996d6a6a70e3c0eb271acc303771765638e46e0f7c9fc01076e9`
+   - `_eval_tinyface_mirror_v1.py` = `9dc1dea8c9e7874c2f5584e1615e5814c6081a2ba2118eb6e7d8be0b797da6d3`
+   - `_run_canary_selftest.py`（金丝雀 runner）= `e2154d98365cf3a2e0ae52bc769a46166fcf4d1488a59a1a0ff90ee672c24d87`
+   - 切分唯一实现 `pair_split_normalize()` 定义于 `_eval_cfp_mirror_v1.py`，校准件同源 import（零复制）；runner 运行时断言两模块函数为同一对象（同源自证）。对齐器 `_align_mirror_calib_v1.py` `b9237526…` 未动。
+4. **金丝雀条款（用户建议采纳；操作化判据事前写死）**：
+   - pairwise（校准腿 + CFP 腿共用同一函数）：① 配对正确性充分证明——same 对喂同一向量、diff 对喂反向向量、标签折聚集各半（n_pairs=4000, dim=64, seed=20261017；L2 归一后 same dist=0 / diff dist=4，官方阈值网格必有完美分离阈值）→ 必须**精确 100.000000%**。操作化披露：条款字面「全同嵌入」若实现为全 same 标签，折内择优阈值使「全判 same」恒得 100%、不构成配对正确性的充分证明（恰为本次病灶所不能测出者）；故按条款意图操作化为 same/diff 各半——错乱配对必落 ~50% 被拦截。② 判别力健全——独立随机嵌入 + 随机各半标签 → 必须 **50%±2%**。
+   - closedset（TinyFace 腿）：① mate 恒同嵌入 → rank-1/5/20 必须精确 **[100,100,100]** 且 shape=(3,)（塌缩类笔误即刻暴露）；② 随机嵌入 → rank-1 必须 **< 5%**。
+   - 执行位置：三件 main() 起点、拒覆盖检查之后、模型加载/嵌入之前（30 秒内失败即 exit 7 拒出数，不烧任何重活）；结果记入 payload `canary` 字段。
+   - 冻结前开发自测（2026-10-17 18:40 +08:00）：两测全过——pairwise ①=100.000000% ②=49.6250%；closedset ①=[100,100,100]@shape(3,) ②=rank1=1.5625%。冻结后开跑前再跑一次出证据件（`results/_canary_mirror_v1_20261017.txt`）。
+5. **一锤封口（用户授权字面，反滑坡条款）**：v2 是唯一重跑。v2 再 FAIL = 真实保真失败，照册收口，不进入第三次仪器修复循环，转 user+P4。执行细则：校准腿（LFW/AgeDB）任一再 FAIL → 即刻收口，CFP/TinyFace 两腿不再出数。
+6. **门限照旧（用户授权字面）**：LFW 99.70±0.5（gate_lo 99.20）、AgeDB 96.58±0.5（gate_lo 96.08）、CFP-FP |mirror−98.00|≤0.5pp、TinyFace §4 三分支——全部不动。
+7. **v2 执行与命名（事前写死）**：顺序照 §7-A1 = LFW → AgeDB → CFP-FP → TinyFace，出数即按 §4/A1 机械落册不现场解读。输出名：`results/lfw_mirror_calib_20261017_v2.json`（v1 名已被病灶件占用，拒覆盖强制）；AgeDB/CFP/TinyFace 三腿用各自 v1 名（旧仪器从未对三腿计分、v1 名未被占用，首次产出用 v1 名照实；仪器身份以 payload 内 `model_sha256` + `eval_script` sha 为准，文件名版本 = 该腿已完成计分次数）。
