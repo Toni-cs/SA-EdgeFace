@@ -83,3 +83,18 @@
 - **原句一（主证，同源已验）**：arXiv:1811.08965v2 原文载「the CentreFace model yields 32.1% Rank-1 on TinyFace versus 65.2% on MegaFace, i.e. a 50+% performance degradation」——https://arxiv.org/html/1811.08965v2 （检索 2026-10-16）。同篇即 D-38⑤ 逐字核验件（表 3 数真实），引文保真零额外成本。
 - **原句二（辅助，实验室仓库 README 非期刊文献）**：idiap 仓 README 载「TinyFace is reported under two alignment pipelines, and the choice moves absolute accuracy by a large margin」——https://github.com/idiap/Synthetic-Data-Generation-for-Low-Resolution-Face-Recognition （检索 2026-10-16；github 直连不通，取证走 ghfast 镜像）。
 - 结论定位：对齐器选择系 TinyFace 的**文献已知敏感性变量**；本件协议假设 = 该已知现象在本项目的实例化，非我方事后推测。
+
+## §7 修订 A1（2026-10-17 12:45 +08:00 追加；带时间戳 amendment，§1-§6 冻结字面不动）
+
+> 授权依据：用户 2026-10-17 平台指令（问答照录，CONFLICTS D-53）：「检测收工后的三个动作（按序）① 漏检统计落册 ② 嵌入+计分，顺序别乱：先 LFW / AgeDB 镜像忠实性校准（授权包条款，LFW 余量 0.0167pp 必须在统一栈下重验——这是镜像是否忠实的裁判）→ 再 CFP-FP → 再 TinyFace ③ 出数即落册，按 §4 三分支判据对号」「同时盯住 LFW：统一栈下 LFW 若跌破 99.70−0.5 下沿，镜像忠实性有问题，回滚排查移植代码——这个判读优先级高于一切 TinyFace 解读」。
+
+1. **范围增补（用户明示授权，§1「两 PASS 腿不重跑」就此两腿开例外）**：新增两条**诊断腿**（LFW 镜像忠实性校准、AgeDB-30 镜像忠实性校准）。两 PASS 腿的既有登记事实（LFW 99.2167 / AgeDB 96.5667）**不动、不重判、不覆盖**；诊断腿产出 = 新名 JSON，只回答「统一镜像栈是否忠实」，不产生任何 PASS/FAIL 重判。
+2. **诊断腿口径（事前写死）**：
+   - 数据 = LFW 协议引用唯一图 7,701（datasets/pairs.txt，sha256 `ea42330c…`，6,000 对 fold-major 300same+300diff×10 已核；raw 全库 13,233，未引用者不碰，CFP 5,901 引用集原则同例）；AgeDB 协议引用唯一图 12,000（agedb_30_index_pairs.txt，6,000 对折聚集 600×10 已核，= variantA 全树）。
+   - 对齐 = §3 C 终值同一实现（`_align_mirror_calib_v1.py`，process_one 直接 import 自冻结件 `_align_mirror_v1.py` sha `6b809d6f…`，MTCNN 参数逐字复写）。
+   - 模型 = w600k_mbf.onnx（sha256 `9cc6e4a75f0e2bf0b1aed94578f144d15175f357bdc05e815e5c4a02b319eb4f`，LFW/AgeDB 臂 1 同件同后端）。
+   - 评测 = 统一镜像栈（flip-TTA 求和 + sklearn L2 + 官方 LFold 十折阈值折内择优，`calculate_roc` 自 `_eval_cfp_mirror_v1.py` 同源 import 零复制）。
+   - **判据（事前写死）**：LFW 校准值 ≥ 99.20（= 锚 99.70−0.5）→ 栈忠实；< 99.20 → **镜像忠实性 FAIL** → 回滚排查移植代码，该判读优先级高于一切 TinyFace 解读（用户指令字面）。AgeDB 校准值 ≥ 96.08（= 锚 96.58−0.5）→ 同判。
+   - 照实披露：臂 1 的 LFW/AgeDB 评测栈无 flip-TTA、无 L2 行归一；诊断腿为统一镜像栈，校准值与臂 1 值之差异同时含对齐+协议两变量；判据只对锚带、不对臂 1。
+3. **执行顺序（用户指令字面，覆盖 §4 隐含的两腿并列）**：漏检统计落册 → LFW 诊断腿 → AgeDB 诊断腿 → CFP-FP 腿 → TinyFace 腿。
+4. **配套实现件跑前纠错（0 张产出、判据零动，照 D-52 先例）**：`_eval_cfp_mirror_v1.py` v1 草稿误置 AdaFace IR-101 为评测模型——与 CFP 锚 98.00（AMD-V2-2 buffalo_s 行）及臂 1 实值 95.5429（w600k_mbf.onnx）不同件，判据失义；开跑前审出，纠正为 w600k_mbf.onnx + egp._preprocess（≡臂 1 栈）。§4 判据字面零动。新 sha 登记 D-53。
