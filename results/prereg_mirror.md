@@ -32,17 +32,17 @@
   甲、修复 torchvision 安装后用 CVLFace 官方 eval 同款 MTCNN（镜像首选）；
   乙、纯 torch MTCNN 移植（同权重、同前处理参数）；
   丙、insightface SCRFD + arcface 模板对齐（末选；须在落册中披露为对板值管线的偏离）。
-- **注（2026-10-17 源码取证，阶梯字面不动、仅照实披露）**：甲「同款 MTCNN」的「同款」在官方源码中**不可核**——全仓 MTCNN 命中=1（且为无关路径串）、eval 数据系预构建工具包而构建法未载、官方随仓对齐 app 用的是 DFA（`minchul/cvlface_DFA_mobilenet`）；toolkit 目录名 `tinyface_aligned_pad_0.1` 构成 pad 0.1 名证。阶梯三档照签执行，「同款」定性降为「按阶梯程序重建的近似」，证据 = `results/_cvlface_pin_20261017.txt`。**路线级三选**（A 官方工具包产物 / B 官方 DFA 程序复跑 / C 本阶梯重建）属条款级选择，待用户裁决；裁决落定前 §3 相关字段不完成、不开跑。
+- **注（2026-10-17 源码取证，阶梯字面不动、仅照实披露）**：甲「同款 MTCNN」的「同款」在官方源码中**不可核**——全仓 MTCNN 命中=1（且为无关路径串）、eval 数据系预构建工具包而构建法未载、官方随仓对齐 app 用的是 DFA（`minchul/cvlface_DFA_mobilenet`）；toolkit 目录名 `tinyface_aligned_pad_0.1` 构成 pad 0.1 名证。阶梯三档照签执行，「同款」定性降为「按阶梯程序重建的近似」，证据 = `results/_cvlface_pin_20261017.txt`。**路线级三选**（A 官方工具包产物 / B 官方 DFA 程序复跑 / C 本阶梯重建）属条款级选择，待用户裁决；裁决落定前 §3 相关字段不完成、不开跑。**裁决已落（2026-10-17，D-48，问答照录）**：「A 并行 + C 兜底」（B 不走）——A 到货按 A 实填 §3；A 中断超窗口切 C（切换必在冻结 commit 之前并记 D-48+时间戳）。两路样本集恒等约束（probe 3,728 / gallery 157,871）通用。
 
 ## §3 口径冻结五字段（冻结 commit 前逐项实填 pin，空值不得开跑）
 
 | 字段 | 冻结值（pin 时实填） |
 |---|---|
-| 检测器（型号 / 权重 sha256） | **源码半已 pin**：repo `https://github.com/mk-minchul/CVLface`，commit `308142aa50adf2e187711354f7524635d3414f1e`，zip sha256 `f76b0a752684e66c07f10cb1080dd619d9660b64b8dcc85276a6da06ab2f2d9d`，渠道 ghfast 镜像，取证 2026-10-17，取证件 `results/_cvlface_pin_20261017.txt`（源码 commit 与权重 hash 双钉规则不变）。**权重/检测器半：待路线裁决后 pin**（三候选 = §2 注 A/B/C；选 B 时 pin `minchul/cvlface_DFA_mobilenet` sha `8317e6dda53d91e7074979923144c2cc08906a33` 起点，选 C 时按阶梯甲乙丙 pin 对应权重并附来源页比对） |
-| 对齐模板（裁剪变换 / 模板点集） | 评测侧已 pin：**eval 阶段无模板变换**，对齐产物即数据集输入直通（`tinyface_evaluator.py:35` + transform 无几何项）。生成侧待路线：A = N/A（官方产物）；B = DFA 关键点仿射（`apps/face_alignment/align.py:55`）；C = MTCNN 5 点模板 + pad 0.1 外扩（名证：`tinyface_aligned_pad_0.1` 目录名） |
-| 插值方式与位深 | 评测侧已 pin：eval transform = `ToTensor + Normalize(0.5,0.5,0.5 / 0.5,0.5,0.5)`，**无 resize、无重采样**（`models/iresnet/__init__.py:51-56`、`pipelines/infer_model_pipeline.py:26-27`）；色彩 RGB 8bit（full.yaml `color_space: RGB`）。生成侧插值待路线（官方工具包构建法未载，A 路即用产物、B/C 路实填自选插值并披露） |
-| 输入尺寸来源 | **已 pin：112×112 预对齐产物直入，eval 不再缩放**（官方 `apps/face_alignment/README.md:4,31` 载 resize 112x112；评测代码零 resize = 本行证据）。尺寸决定权在数据集侧 |
-| 漏检策略 | **结构披露：官方无明文可照搬**——facerec_val 系预构建工具包（`docs/pages/eval_datasets.md:22-24`），仓内无建库代码、MTCNN 命中=1（无关路径串），故原稿「逐字照搬官方」在重建路线（B/C）下不可满足。待路线裁决后实填：A = N/A（官方产物已含其漏检既成事实，样本集直接沿用）；B/C = 自定处置 + 落册披露「官方未载、非照搬」。**恒等约束不变**：样本集不得因漏检变动，probe 3,728 / gallery 157,871 计数恒等 |
+| 检测器（型号 / 权重 sha256） | **源码半已 pin**：repo `https://github.com/mk-minchul/CVLface`，commit `308142aa50adf2e187711354f7524635d3414f1e`，zip sha256 `f76b0a752684e66c07f10cb1080dd619d9660b64b8dcc85276a6da06ab2f2d9d`，渠道 ghfast 镜像，取证 2026-10-17，取证件 `results/_cvlface_pin_20261017.txt`（源码 commit 与权重 hash 双钉规则不变）。**权重/检测器半（路线 D-48 = A 并行 + C 兜底）**：A 到货 = N/A（官方预对齐产物直用，工具包 zip sha256 作权重级 pin + 来源比对附卷）；A 中断切 C = 按阶梯甲乙丙 pin 对应权重 + 来源页比对后落值，缺一不得冻结 |
+| 对齐模板（裁剪变换 / 模板点集） | 评测侧已 pin：**eval 阶段无模板变换**，对齐产物即数据集输入直通（`tinyface_evaluator.py:35` + transform 无几何项）。生成侧（D-48 裁决下）：A 到货 = N/A（官方产物）；切 C = MTCNN 5 点模板 + pad 0.1 外扩（名证：`tinyface_aligned_pad_0.1` 目录名） |
+| 插值方式与位深 | 评测侧已 pin：eval transform = `ToTensor + Normalize(0.5,0.5,0.5 / 0.5,0.5,0.5)`，**无 resize、无重采样**（`models/iresnet/__init__.py:51-56`、`pipelines/infer_model_pipeline.py:26-27`）；色彩 RGB 8bit（full.yaml `color_space: RGB`）。生成侧插值：A = 官方产物整体 pin（其生成插值不可拆分即随卷登记）；切 C = 自选插值落值 + 披露 |
+| 输入尺寸来源 | **已 pin：112×112 预对齐产物直入，eval 不再缩放**（官方 `apps/face_alignment/README.md:4,31` 载 resize 112x112；评测代码零 resize = 本行证据）。尺寸决定权在数据集侧，A/C 两路同此 |
+| 漏检策略 | **结构披露已立（官方对漏检处置无明文）**；D-48 裁决下实填：A = N/A（官方产物含其漏检既成事实，样本集直接沿用）；切 C = 自定处置 + 落册披露「官方未载、非照搬」。**恒等约束不变**：样本集不得因漏检变动，probe 3,728 / gallery 157,871 计数恒等 |
 
 - 镜像源码 pin：**已落**（2026-10-17，上表源码半 + 取证件 `results/_cvlface_pin_20261017.txt`，含协议七项行级证据、网络实测、HF 探测、原始数据在位清单）。
 - 数据沿用 D-40 清单与 manifest（sha 84a64a9d…），不重切、不重建。
