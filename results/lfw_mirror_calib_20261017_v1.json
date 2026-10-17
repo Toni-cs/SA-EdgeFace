@@ -1,0 +1,33 @@
+{
+  "leg": "镜像忠实性校准腿（诊断腿，非判键腿；两 PASS 腿登记事实不动）",
+  "dataset": "lfw",
+  "model_path": "weights\\models\\buffalo_s\\w600k_mbf.onnx",
+  "model_sha256": "9cc6e4a75f0e2bf0b1aed94578f144d15175f357bdc05e815e5c4a02b319eb4f",
+  "backend": "onnxruntime 1.30.0 providers=['CPUExecutionProvider']",
+  "preprocess": "bgr_rgb_resize112_div127.5_-1",
+  "metric": "verification acc 10-fold（官方 LFold 移植 + flip-TTA 求和 + L2）",
+  "value": 48.93333333333333,
+  "std": 0.9695359714832658,
+  "fold_acc_pct": [
+    49.0,
+    50.16666666666667,
+    48.5,
+    48.333333333333336,
+    51.0,
+    48.16666666666667,
+    49.666666666666664,
+    48.0,
+    48.0,
+    48.5
+  ],
+  "anchor": 99.7,
+  "gate_lo": 99.2,
+  "verdict": "FIDELITY_FAIL",
+  "align_root": "E:\\下次比赛项目\\face_recognition_research\\datasets\\lfw_mirror_112",
+  "align_script": "scripts/_align_mirror_calib_v1.py（process_one 同源自 _align_mirror_v1 冻结件）",
+  "eval_script": "scripts/_eval_calib_mirror_v1.py（calculate_roc 同源自 _eval_cfp_mirror_v1）",
+  "protocol": "官方镜像栈：flip-TTA 求和 + sklearn L2 normalize + LFold(10,shuffle=False) 阈值折内择优（与 CFP 腿同实现）",
+  "prereg": "results/prereg_mirror.md §7 修订 A1（先冻结后开跑）",
+  "arm1_note": "臂 1 栈无 flip-TTA/无 L2 行归一（insightface_lfw.py / egp 直乘）；本腿为统一镜像栈，与臂 1 值差异含对齐+协议两变量；判据只对锚带不对臂 1",
+  "date": "2026-10-17T13:15:09"
+}
