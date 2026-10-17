@@ -123,3 +123,18 @@
 5. **一锤封口（用户授权字面，反滑坡条款）**：v2 是唯一重跑。v2 再 FAIL = 真实保真失败，照册收口，不进入第三次仪器修复循环，转 user+P4。执行细则：校准腿（LFW/AgeDB）任一再 FAIL → 即刻收口，CFP/TinyFace 两腿不再出数。
 6. **门限照旧（用户授权字面）**：LFW 99.70±0.5（gate_lo 99.20）、AgeDB 96.58±0.5（gate_lo 96.08）、CFP-FP |mirror−98.00|≤0.5pp、TinyFace §4 三分支——全部不动。
 7. **v2 执行与命名（事前写死）**：顺序照 §7-A1 = LFW → AgeDB → CFP-FP → TinyFace，出数即按 §4/A1 机械落册不现场解读。输出名：`results/lfw_mirror_calib_20261017_v2.json`（v1 名已被病灶件占用，拒覆盖强制）；AgeDB/CFP/TinyFace 三腿用各自 v1 名（旧仪器从未对三腿计分、v1 名未被占用，首次产出用 v1 名照实；仪器身份以 payload 内 `model_sha256` + `eval_script` sha 为准，文件名版本 = 该腿已完成计分次数）。
+
+
+## §9 修订 A3（2026-10-17 20:06 +08:00 追加；带时间戳 amendment，§1-A2 冻结字面不动）
+
+> 授权依据：用户 2026-10-17 裁决（问答照录，CONFLICTS D-56）五项：
+> ① 臂 1 登记事实不动，LFW/AgeDB 两 PASS 照旧收编。② CFP-FP / TinyFace 两 FAIL 维持登记，走预防性披露；投稿前不开任何新协议狩猎。③ 镜像线按「移植已尝试、量化 −2.1334pp、H2 经移植器械不可检验」收口；H2 落册 instrument-unavailable，不缩族、不事后改写。④ 授权一次法证性诊断（庭令取证、非候选、无门限）：AdaFace 官方权重经 hf-mirror 取得并 sha 登记，过同一镜像跑 LFW 单跑，仅定因，不出 gate。复现板上值 → 生态不匹配定谳；同幅跌落 → 镜像实现 bug 定谳，修否由 P4 裁（倾向不修）。⑤ P4 短庭四项议程锁定，不设自由议题。
+> 一句话（用户原话照录）：「别把 97.08 当失败埋掉——先用一次 40 分钟的 AdaFace 判别跑把它变成‘定因的发现’，然后镜像线体面落幕，论文多一段审稿人驳不动的方法论；真正的裁点只剩 P4 短庭走个追认程序。」
+
+1. **定性（裁决④字面）**：本跑 = 庭令取证、非候选、无门限。不产生任何 PASS/FAIL 判键、不进 §4 三分支、不改任何既有登记；结果只回答定因问题。
+2. **官方权重要件核验（裁决④「经 hf-mirror 取得并 sha 登记」兑现）**：经 hf-mirror 取官方 model.safetensors（hf-mirror.com/minchul/cvlface_adaface_ir101_webface12m，260,980,552 B），sha256 = 2ea535a43877bd3de8091903935c783ce335be66a9f8917fae9a7a18ae4bbf56。在盘评测件 .pt（sha256 e312d79222d28027f146ed495e182e48fe0dddf404cdbbdabcccdbdd07cc3758，P4 :214 注册件）与之张量级比对：**ALL-EXACT，917/917 逐件一致，max|Δ|=0.0**（键集仅 model. 前缀形态差；dtypes F32×764+I64×153 双侧一致；比对 2026-10-17）→ 权重链闭合：评测件 ≡ hf-mirror 官方件。
+3. **板值钉死（跑前，禁事后取数）**：CVLFace Performance Board IR101|AdaFace|WebFace12M 行 LFW = 99.82（github.com/mk-minchul/CVLface README，ghfast.top 代理直取复核 2026-10-17；同板交叉登记 CFPFP 99.24 / AGEDB 98.00；表头列序 AVG | LFW | CPFLW | CFPFP | CALFW | AGEDB | IJBB@0.01 | IJBC@0.01 | TinyFace R1 | TinyFace R5）。
+4. **实验设计（唯一变量 = 模型）**：与 LFW 校准腿 v2 完全同栈——datasets/lfw_mirror_112 + egp._preprocess（≡ AdaFace 官方 ToTensor+Normalize(0.5) 数值同式，D-53 行核；AdaFace 模型卡同式佐证）→ flip-TTA 求和（归一化前）→ pair_split_normalize（交错切分+L2）→ calculate_roc LFold(10, shuffle=False) 网格 arange(0,4,0.01) 折内择优。四路同源 import 零复制（_eval_cfp_mirror_v1 / _eval_calib_mirror_v1.load_protocol / _calib_tinyface_gpu.build_adaface）。金丝雀 pairwise 两测沿用（不过 exit 7 拒出数）。单跑、不重跑。
+5. **判决树操作化（裁决④字面三分支化；仅定因分类、不构成判键）**：板值 99.82、同幅参照 −2.1334pp（D-55：97.0833−99.2167）；acc ≥ 99.32（板值−0.5，全项目带宽惯例）→ 生态不匹配定谳；acc ≤ 98.1866（= 99.82−2.1334+0.5，同幅带）→ 镜像实现 bug 定谳（再低 = 跌幅超同幅，同分支加强证据照实注记）；98.1866 < acc < 99.32 → 两分支不吻合、不指定定谳、转 P4。修否由 P4 裁（用户倾向不修）。
+6. **法证件登记**：scripts/_eval_lfw_forensic_adaface_v1.py sha256 = 495e26c2cdd5c3600987259594d096675e5b9d2b848940978fa05f85220067e5（.gitignore:36 盘上件；py_compile 过 2026-10-17 20:05）。输出 results/lfw_mirror_forensic_adaface_20261017_v1.json（拒覆盖 exit 5）。payload 无 gate/verdict 字段，含 attribution / attribution_rule / official_weight_check / board 四字段。
+7. **镜像线收口与落册（裁决③①②字面，本 A3 一并冻结）**：镜像线按「移植已尝试、量化 −2.1334pp、H2 经移植器械不可检验」收口；H2 落册 instrument-unavailable，不缩族、不事后改写。LFW v2 = 97.0833% FIDELITY_FAIL(v2-final) 照册（A2 §8-5 一锤封口执行件，D-55）；CFP-FP 95.5429% / TinyFace 44.4474% 两 FAIL 登记不动、走预防性披露；LFW/AgeDB 两 PASS 照旧收编；投稿前不开任何新协议狩猎。
