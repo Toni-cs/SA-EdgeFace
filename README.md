@@ -54,13 +54,15 @@ This repository accompanies our IEEE Access paper studying a critical question: 
 | InsightFace-s (teacher) | 99.22 | 0.9965 | 3.40 |
 | **SA-EdgeFace (ours)** | **94.30** | **0.9882** | **0.93** |
 
-### Efficiency (CPU, 112×112 input)
+### Efficiency (GPU p50, 112×112 input)
 
-| Model | Params (M) | FLOPs (G) | Latency (ms) |
+| Model | Params (M) | FLOPs (G) | GPU p50 (ms) |
 |-------|-----------|-----------|--------------|
-| C0 baseline (0.5×) | 0.866 | 0.0228 | 8.3 (legacy, unverified) |
-| **C4 SA-EdgeFace** | **0.930** | **0.0259** | **11.1 (legacy, unverified)** |
-| EdgeFace 1.0× | 1.778 | 0.0799 | 9.8 |
+| C0 baseline (0.5×) | 0.866 | 0.0250 | 17.5 |
+| **C4 SA-EdgeFace** | **0.930** | **0.0281** | **21.1** |
+| EdgeFace 1.0× | 1.778 | 0.0839 | 17.6 |
+
+FLOPs via thop 2.0.20 (flops = 2×MACs); latency = GPU p50 (batch 1, warm-up 50 + 200 runs, torch.cuda.Event).
 
 ## Quick Start
 
