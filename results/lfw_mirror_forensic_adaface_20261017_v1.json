@@ -1,0 +1,49 @@
+{
+  "disposition": "法证性诊断（prereg §9-A3；庭令取证、非候选、无门限）",
+  "dataset": "lfw",
+  "canary": "canary PASS ①=100.000000% ②=49.6250%",
+  "model_path": "[PATH]\\datasets\\downloads\\adaface\\cvlface_adaface_ir101_webface12m_model.pt",
+  "model_sha256": "e312d79222d28027f146ed495e182e48fe0dddf404cdbbdabcccdbdd07cc3758",
+  "official_weight_check": {
+    "hf_mirror_url": "https://hf-mirror.com/minchul/cvlface_adaface_ir101_webface12m/resolve/main/model.safetensors",
+    "safetensors_sha256": "2ea535a43877bd3de8091903935c783ce335be66a9f8917fae9a7a18ae4bbf56",
+    "safetensors_bytes": 260980552,
+    "comparison": "ALL-EXACT 917/917 张量逐件一致 max|Δ|=0.0（键集仅 model. 前缀形态差）",
+    "date": "2026-10-17"
+  },
+  "board": {
+    "value": 99.82,
+    "row": "IR101 | AdaFace | WebFace12M | LFW 列",
+    "source": "CVLFace Performance Board, github.com/mk-minchul/CVLface README",
+    "url": "https://github.com/mk-minchul/CVLface",
+    "retrieval": "ghfast.top 代理直取复核 2026-10-17（首取 2026-10-16，值一致）"
+  },
+  "backend": "cuda:0 NVIDIA GeForce RTX 5060 Laptop GPU torch 2.11.0+cu128",
+  "preprocess": "bgr_rgb_resize112_div127.5_-1（≡ AdaFace 官方 ToTensor+Normalize(0.5)，D-53 行核）",
+  "metric": "verification acc 10-fold（官方 LFold 移植 + flip-TTA 求和 + L2；与 LFW v2 同栈）",
+  "value": 97.33333333333334,
+  "std": 0.4533823502911823,
+  "fold_acc_pct": [
+    97.33333333333334,
+    97.0,
+    98.0,
+    97.83333333333334,
+    96.83333333333334,
+    97.16666666666667,
+    97.33333333333334,
+    97.83333333333334,
+    97.5,
+    96.5
+  ],
+  "delta_vs_board_pp": -2.4866666666666504,
+  "reference_drop_w600k_pp": -2.1334,
+  "attribution": "镜像实现 bug 定谳",
+  "attribution_branch": "同幅跌落分支（acc≤98.1866，与 −2.1334pp 同量级带）",
+  "attribution_rule": "§9-A3 操作化：≥99.32→生态不匹配；≤98.1866→镜像 bug；中间带→转 P4；仅定因分类、不构成判键/PASS/FAIL、修否由 P4 裁",
+  "feats_sha256": "348aba30456b79d496bc55bcd7481bc92b035643d73978ecfead10cb7bedaa2d",
+  "align_root": "[PATH]\\datasets\\lfw_mirror_112",
+  "eval_script": "scripts/_eval_lfw_forensic_adaface_v1.py（calculate_roc/pair_split/load_protocol/build_adaface 四路同源 import，零复制）",
+  "prereg": "results/prereg_mirror.md §9 修订 A3（先冻结后开跑）",
+  "authorization": "用户 2026-10-17 裁决第 4 项（D-56 照录）",
+  "date": "2026-10-17T20:11:52"
+}
