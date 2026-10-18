@@ -5,6 +5,10 @@
 </p>
 
 <p align="center">
+  <b>Author:</b> <a href="https://github.com/jonson964">@jonson964</a>
+</p>
+
+<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/python-3.10+-green.svg" alt="Python">
   <img src="https://img.shields.io/badge/PyTorch-2.4+-ee4c2c.svg" alt="PyTorch">
@@ -192,7 +196,7 @@ If you find this work useful, please cite:
 ```bibtex
 @article{saedgeface2026,
   title={When More Is Less: A Capacity-Aware Study of Enhancement Techniques for Sub-Million-Parameter Face Recognition},
-  author={Toni-cs},
+  author={jonson964},
   journal={IEEE Access},
   year={2026},
   note={Under review}
