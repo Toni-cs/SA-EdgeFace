@@ -322,3 +322,20 @@ for N, ncell in [(20,2),(30,3)]:
 - §15-1（pin 1 行）状态更正：其「待：四实现与 gate_check.py 均未落盘（`gate_check.py` Test-Path=False 实测）；冻结时填实值」已于冻结 commit de13df9（2026-10-15）失实——T-R2/R3/R4/R5 全件 + `gate_check.py` + 单测件 48/48（`results/_unit_tests_20261015.txt`）+ S1-S17（`results/_selftest_20261015.txt`）+ 冒烟 PASS10/FAIL0/PENDING29 exit 1（`results/_gate_check_smoke_20261015.json`）均已入库/落盘；代码冻结 HEAD = de13df9。§18-3（commit 清单第 3 行）状态同步更正：「待（随 pin 1）」→ 实值同上，以 de13df9 为准。§19 门表为冻结时点快照、不改；P3 现状（条件全绿，本节落笔即全绿）以本 amendment 与 CONFLICTS 完成行为准。
 - 驱动登记：`scripts/_phase3_run.py` 属 .gitignore `scripts/_*` 仓外件，无 HEAD 哈希，以 sha256 = fc0ee4cfd339d3577215fbc19d9681f34f2199165e93141cbaf5ba18dc59de9a 为唯一完整性锚；义务条款：驱动每次 `--run` 启动时自校验该 sha256，不符即拒绝执行（实现并入 S 套件，下次自测报告留证）。填入后本值即定稿，此后变更须新 amendment。
 - §15-4（pin 4 行）尾句指针笔误更正（归置自 CONFLICTS D-33⑩；原裁「登记不改文」，现并入本 errata 件——同类更正边际成本为零，冻结件不留已知假指针，不单列新通道）：「通道条款成文见 §16.1」应为「通道条款成文见 §16.2」。§16.1 = amendment 规则，§16.2 = 揭盲前评测集 hash 通道条款（正文本体）。
+
+## 25. amendment（2026-10-19 15:58 +08:00，N3 终局簿记——σ̂ 回填位状态互引 + DG-R2a 终局登记，零新跑；本节只增行，§1–§24 与文末复现命令一字未动）
+
+1. **σ̂ 回填位状态（与 prereg_sigma.md §9 互引）**：§8 唯一 σ̂ 回填点未激活——其前提「CASIA 20 臂全部落盘后」未满足（臂登记正本 `results/_phase3_progress.json` 仅 E/B 两臂、A 组矩阵臂零落盘，全盘检索 2026-10-19 实测；因果链见 prereg_sigma.md §9-1 与 CONFLICTS D-69①）。§10.2 的「四主假设在假设 σ 附近全部预注册为 descriptive + CI 结局」为**设计层注册声明**（按 σ 假设的 MDE 精算结论），非本族任何假设的实测结局。
+2. **DG-R2a 终局登记（对 §14 DG-R2a 行）**：其时点「CASIA 20 臂全部落盘 + σ̂ checkpoint 扩样判定锁定后」未达 → 门未触发；四主假设族（H1–H4）以**未检验状态关闭**——Holm（首阈 0.0125）裁决未执行、扩样未触发；§14 死刑条款原样维持（不许迁主战场、不许补 seed、不许换端点、不许加假设、不许二次扩样）。`underpowered at this effect size`（prereg_sigma.md §2/§11 分支短语）未执行、不适用于本关闭。
+3. **关闭原因链 = DG-R0a 校准终局（四值照登；全为 calibration arms，非注册矩阵臂）**：
+
+   | 端点 | 实值 | 判 | 证据件 |
+   |---|---|---|---|
+   | LFW（臂 1 原生栈，既有件复用） | 99.2167% | PASS（锚 99.70±0.5，Δ0.4833pp 贴边） | `results/insightface_lfw.json`（`日报_20261015.md:46`） |
+   | AgeDB-30 变体 A | 96.5667% | PASS（锚 96.58±0.5，Δ0.0133pp） | `results/_t5_calibration_agedb30_va_20261015.json:5` |
+   | CFP-FP（V2 fiducial 栈） | 95.5429% | FAIL（锚 98.00±0.5，−2.4571pp） | `results/_t5_calibration_cfpfp_fid2_20261015.json`（`日报_20261015.md:15`） |
+   | TinyFace R1（resize 直采） | 44.4474% | FAIL（判键 72.42±0.5，−27.9726pp） | `results/_t5_calibration_tinyface_ibr_gpu_v2_20261016.json`（`日报_20261016.md:138`） |
+
+   后果链：CFP-FP FAIL → (a) 通道关闭、A 组首臂维持阻塞（`日报_20261016.md:35/:129`）→ 本节 2 之终局。两 FAIL 腿维持登记、走预防性披露、投稿前不开任何新协议狩猎（D-56②/D-58②）；LFW/AgeDB 两 PASS 照 D-58① 收编，臂 1 栈未受镜像线触碰。
+4. **H2 状态**：H2 = instrument-unavailable 已落册（D-56③ 起案；量化句按 D-58③ 原位更新，原文以台账为准，本节不复写）；镜像线已按「移植已尝试、定因诊断、封口下未修复」收口，不缩族、不事后改写，与本节 2 的族关闭状态并行成立。正文载体 = paper 4.x 结果段（D-68 入库件）。
+5. 本节为状态登记：零新跑、零新数值（除照登四值外）、不改 §1–§24 任何字节。
