@@ -20,7 +20,7 @@
 
 SA-EdgeFace is a lightweight face recognition model designed for **surveillance-edge deployment**. Built on ShuffleNetV2 0.5× (0.87M parameters), it achieves **94.30% LFW accuracy** (10-fold CV) with sub-million parameters.
 
-This repository accompanies our IEEE Access paper studying a critical question: **do enhancement techniques (attention, distillation, augmentation) transfer to the sub-million-parameter regime?** Through systematic ablation on CASIA-WebFace → LFW, we find that **three of four enhancement categories hurt** below 1M parameters, and the sole distillation strategy that works peaks at the ep-20 onset, which coincides with the first learning-rate decay and is therefore confounded; a factorial design that isolates timing from the schedule is reported in the paper.
+This repository accompanies our T-BIOM manuscript (under review), studying a critical question: **do enhancement techniques (attention, distillation, augmentation) transfer to the sub-million-parameter regime?** Through systematic ablation on CASIA-WebFace → LFW, we find that **three of four enhancement categories hurt** below 1M parameters, and the sole distillation strategy that works peaks at the ep-20 onset, which coincides with the first learning-rate decay and is therefore confounded; a factorial design that isolates timing from the schedule is reported in the paper.
 
 ### Key Findings
 
@@ -58,11 +58,13 @@ This repository accompanies our IEEE Access paper studying a critical question: 
 
 | Model | Params (M) | FLOPs (G) | GPU p50 (ms) |
 |-------|-----------|-----------|--------------|
-| C0 baseline (0.5×) | 0.866 | 0.0250 | 17.5 |
-| **C4 SA-EdgeFace** | **0.930** | **0.0281** | **21.1** |
-| EdgeFace 1.0× | 1.778 | 0.0839 | 17.6 |
+| C0 baseline (0.5×) | 0.866 | 0.0250 | 17.46 |
+| **C4 SA-EdgeFace** | **0.930** | **0.0281** | **21.06** |
+| EdgeFace 1.0× | 1.778 | 0.0839 | 17.59 |
 
 FLOPs via thop 2.0.20 (flops = 2×MACs); latency = GPU p50 (batch 1, warm-up 50 + 200 runs, torch.cuda.Event).
+
+At batch=1 on desktop hardware the GPU is latency-bound, so the 3× FLOPs reduction of the 0.5× width does not translate into wall-clock speed; SA-EdgeFace trades ≈3.6 ms of GPU p50 latency for its accuracy gain over the 0.5× baseline, and the sub-million parameter budget targets memory-constrained edge deployment, where model size—not desktop-GPU latency—is the binding constraint.
 
 ## Quick Start
 
@@ -167,14 +169,14 @@ SA-EdgeFace/
 ├── scripts/                     # Training & evaluation scripts
 │   ├── train_ablation.py        # 6-config ablation training
 │   ├── train_edgeface_1x.py     # EdgeFace 1.0× baseline
-│   ├── eval_lfw_full.py         # Batch LFW evaluation
-│   ├── eval_multiseed_lfw.py    # Multi-seed eval + paired t-test
+│   ├── prepare_lfw.py           # LFW download + MD5 verify
 │   ├── align_lfw.py             # LFW face alignment
+│   ├── eval_lfw_full.py         # Batch LFW evaluation
+│   ├── eval_lfw_single.py       # Single-config LFW evaluation
+│   ├── eval_efficiency.py       # Efficiency benchmark (GPU p50 + FLOPs)
+│   ├── eval_multiseed_lfw.py    # Multi-seed eval + paired t-test
 │   └── parse_train_logs.py      # Training log parser
-├── paper/                       # LaTeX paper (IEEE Access)
-│   ├── main.tex
-│   ├── methods.tex
-│   └── figs/                    # Figures (ROC, training curves, etc.)
+├── paper/                       # Manuscript source withheld during review (not in this repository)
 ├── results/                     # Experiment results + training curves
 ├── weights/                     # Model checkpoints (gitignored)
 ├── datasets/                    # Datasets (gitignored)
@@ -198,8 +200,8 @@ If you find this work useful, please cite:
 ```bibtex
 @article{saedgeface2026,
   title={When More Is Less: A Capacity-Aware Study of Enhancement Techniques for Sub-Million-Parameter Face Recognition},
-  author={jonson964},
-  journal={IEEE Access},
+  author={[Authors]},
+  journal={IEEE T-BIOM},
   year={2026},
   note={Under review}
 }

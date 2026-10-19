@@ -1,3 +1,8 @@
+# SUPERSEDED (2026-10-19): legacy CPU-run latency table (device=cpu, runs=30, input 112).
+# Current efficiency figures = GPU p50 (batch 1, warm-up 50 + 200 timed runs,
+#   torch.cuda.Event): see README section "Efficiency (GPU p50, 112x112 input)"
+#   and results/_t4_efficiency_20261018.json (raw p50/p95/mean + thop 2.0.20 FLOPs).
+# Original measurement lines below are preserved unmodified (nothing removed).
 device=cpu input_size=112 runs=30
 Config                  Params(M)   FLOPs(G)  Latency(ms)
 baseline                    1.778     0.0799       78.186

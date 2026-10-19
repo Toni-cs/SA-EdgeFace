@@ -23,9 +23,21 @@ logs_multiseed/
 
 # 审查/临时产物（永不提交）
 results/_*
+# D-67 效率测量原始 JSON（单发入库；*_ 临时规则唯一例外，仅此一件）
+!results/_t4_efficiency_20261018.json
 
 # Paper (不公开)
 paper/
+
+# LaTeX 构建产物（仓根级；paper/ 整目录已按 Q4 裁定忽略）
+*.aux
+*.bbl
+*.blg
+*.out
+*.synctex.gz
+*.toc
+*.fdb_latexmk
+*.fls
 
 # OS
 Thumbs.db
@@ -34,6 +46,7 @@ Thumbs.db
 results/stat_*
 results/statistical_*
 scripts/_*
+scripts/audit/
 results/multiseed_lfw.json
 results/lfw_10fold_cfg4.json
 results/efficiency_cpu_*.txt
