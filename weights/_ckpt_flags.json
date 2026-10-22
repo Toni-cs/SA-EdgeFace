@@ -1,0 +1,476 @@
+{
+  "_meta": {
+    "created": "2026-10-22",
+    "authority": "D-96 批复④",
+    "note": "sidecar only, zero write to .pt files",
+    "schema": "E 口径 76 条 + 教师单列 (D-97 批复①)",
+    "counts": {
+      "丙-dead": 31,
+      "丙-NaN": 6,
+      "未完-A1": 9,
+      "未完-A2": 8,
+      "冷备": 1,
+      "已知共存": 20,
+      "教师模型": 1,
+      "total": 76
+    }
+  },
+  "flags": [
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep1.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep10.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep11.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep12.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep13.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep14.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep15.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep16.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep17.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep18.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep19.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep2.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep20.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep21.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep22.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep23.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep24.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep25.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep26.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep27.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep28.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep29.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep3.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep30.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep4.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep5.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep6.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep7.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep8.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_ep9.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed42_final.pt",
+      "label": "丙-dead",
+      "loadable": false,
+      "evidence": "_ckpt_health.csv dead=True; multiseed_lfw acc=0.5000"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_ep1.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_ep2.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_ep3.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_ep4.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_ep5.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg4_seed2024_final.pt",
+      "label": "丙-NaN",
+      "loadable": false,
+      "evidence": "n_nan=939718, fin=False"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep1.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep2.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep3.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep4.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep5.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep6.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep7.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_ep8.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg3_seed456_final.pt",
+      "label": "未完-A1",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep1.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep2.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep3.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep4.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep5.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep6.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_ep7.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "weights/ablation_casia/cfg0_seed456_final.pt",
+      "label": "未完-A2",
+      "loadable": false,
+      "evidence": "epoch<10 未跑完"
+    },
+    {
+      "path": "buffalo_s.zip",
+      "label": "冷备",
+      "loadable": false,
+      "note": "教师原始分发包"
+    },
+    {
+      "path": "weights/models/buffalo_s/1k3d68.onnx",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/2d106det.onnx",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CALFW_metrics.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CALFW_plot.png",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CALFW_sims.csv",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CFPW_metrics.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CFPW_plot.png",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CFPW_sims.csv",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CPLFW_metrics.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CPLFW_plot.png",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/CPLFW_sims.csv",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/LFW_metrics.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/LFW_plot.png",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/LFW_sims.csv",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/det_500m.onnx",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/genderage.onnx",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/metrics.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/plot.png",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/ref.json",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/sims.csv",
+      "label": "已知共存",
+      "loadable": false,
+      "note": "InsightFace 评测残留, 已知共存"
+    },
+    {
+      "path": "weights/models/buffalo_s/w600k_mbf.onnx",
+      "label": "教师模型",
+      "loadable": true,
+      "note": "D-96 批复① 教师口径 buffalo_s/w600k_mbf.onnx 512维"
+    }
+  ]
+}
