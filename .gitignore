@@ -61,3 +61,5 @@ results/pairs/
 /logs/
 /logs_phase3/
 /logs_pilot/
+# CodeArts 索引目录（不入库）
+.codegraph

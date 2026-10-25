@@ -1,0 +1,5 @@
+datasets/
+weights/
+results/
+*.onnx
+*.pth
