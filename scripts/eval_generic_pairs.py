@@ -66,6 +66,68 @@ DEFAULT_AGEDB_PAIRS = "datasets/raw/agedb30/agedb_30.txt"
 MANIFEST_DIR = "datasets/eval_manifests"
 PREPROCESS_DESC = "bgr_rgb_resize112_div127.5_-1"   # 与 eval_lfw_single 逐位同口径
 
+# ---- canary（门二；自 scripts/_eval_cfp_mirror_v1.py 移植，逻辑零改）----
+def _canary_calculate_accuracy(threshold, dist, actual_issame):
+    predict_issame = np.less(dist, threshold)
+    tp = np.sum(np.logical_and(predict_issame, actual_issame))
+    fp = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
+    tn = np.sum(np.logical_and(np.logical_not(predict_issame), np.logical_not(actual_issame)))
+    fn = np.sum(np.logical_and(np.logical_not(predict_issame), actual_issame))
+    acc = float(tp + tn) / dist.size
+    return acc
+
+
+def _canary_calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_folds=10):
+    from sklearn.model_selection import KFold
+    nrof_pairs = min(len(actual_issame), embeddings1.shape[0])
+    k_fold = KFold(n_splits=nrof_folds, shuffle=False)
+    accuracy = np.zeros((nrof_folds))
+    indices = np.arange(nrof_pairs)
+    diff = np.subtract(embeddings1, embeddings2)
+    dist = np.sum(np.square(diff), 1)
+    for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
+        acc_train = np.zeros((len(thresholds)))
+        for threshold_idx, threshold in enumerate(thresholds):
+            acc_train[threshold_idx] = _canary_calculate_accuracy(
+                threshold, dist[train_set], actual_issame[train_set])
+        best_threshold_index = np.argmax(acc_train)
+        accuracy[fold_idx] = _canary_calculate_accuracy(
+            thresholds[best_threshold_index], dist[test_set], actual_issame[test_set])
+    return accuracy
+
+
+def _canary_pair_split_normalize(e1, e2):
+    import sklearn.preprocessing
+    emb = np.stack([e1, e2], axis=1).reshape(-1, e1.shape[1])
+    emb = sklearn.preprocessing.normalize(emb)
+    return emb[0::2], emb[1::2]
+
+
+def canary_pair_split(seed=20261017, n_pairs=4000, dim=64):
+    """门二金丝雀：① 配对正确性充分证明（须精确 100%）② 判别力健全（须 50%±2%）。"""
+    rng = np.random.RandomState(seed)
+    v = rng.normal(size=(n_pairs, dim)).astype(np.float32)
+    v /= np.linalg.norm(v, axis=1, keepdims=True) + 1e-10
+    e2 = v.copy()
+    e2[n_pairs // 2:] *= -1
+    labels = np.zeros(n_pairs, dtype=bool)
+    labels[: n_pairs // 2] = True
+    thr = np.arange(0, 4, 0.01)
+    e1n, e2n = _canary_pair_split_normalize(v, e2)
+    acc1 = float(np.mean(_canary_calculate_roc(thr, e1n, e2n, labels, nrof_folds=10)) * 100)
+    if abs(acc1 - 100.0) > 1e-6:
+        return False, "canary① FAIL acc=%.6f%%（期望精确 100%%）" % acc1
+    r1 = rng.normal(size=(n_pairs, dim)).astype(np.float32)
+    r2 = rng.normal(size=(n_pairs, dim)).astype(np.float32)
+    rlab = np.zeros(n_pairs, dtype=bool)
+    rlab[rng.permutation(n_pairs)[: n_pairs // 2]] = True
+    e1n, e2n = _canary_pair_split_normalize(r1, r2)
+    acc2 = float(np.mean(_canary_calculate_roc(thr, e1n, e2n, rlab, nrof_folds=10)) * 100)
+    if not (48.0 <= acc2 <= 52.0):
+        return False, "canary② FAIL acc=%.4f%%（期望 50%%±2%%）" % acc2
+    return True, "canary PASS ①=100.000000%% ②=%.4f%%" % acc2
+
+
 
 # ============================ 工具 ============================
 
@@ -628,6 +690,13 @@ def main():
     cache = extract_embeddings(paths, (backend, obj), args.batch, device)
     print(f"[embed] {len(cache)} 特征就绪（{backend}）", flush=True)
 
+    # canary（门二）：任一不过 → 拒绝出数
+    canary_ok, canary_msg = canary_pair_split()
+    print(f"[canary] {canary_msg}", flush=True)
+    if not canary_ok:
+        print("[ERROR] canary 不过，拒绝出数", flush=True)
+        sys.exit(7)
+
     # 3) 协议评测（按 KIND 分派，禁止互相误入）
     extra = {}
     if kind == "pairwise":
@@ -682,7 +751,7 @@ def main():
         backbone=(None if backend == "onnx" else args.backbone),
         aligned_root=os.path.abspath(args.aligned_root),
         manifest=os.path.abspath(csv_path), manifest_sha256=meta["manifest_sha256"],
-        preprocess=PREPROCESS_DESC, device=device,
+        preprocess=PREPROCESS_DESC, device=device, canary=canary_msg,
         date=datetime.datetime.now().isoformat(timespec="seconds"),
         script="scripts/eval_generic_pairs.py",
         **extra,
