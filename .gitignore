@@ -63,3 +63,4 @@ results/pairs/
 /logs_pilot/
 # CodeArts 索引目录（不入库）
 .codegraph
+.codeartsdoer/
