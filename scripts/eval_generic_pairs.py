@@ -50,16 +50,17 @@ from sklearn.metrics import roc_curve, auc                      # noqa: E402
 from qad_face.utils import imread_cn                            # noqa: E402
 from qad_face.models.edgeface import DEFAULT_CONFIGS, build_edgeface  # noqa: E402
 
-DATASET_CHOICES = ("cfp_fp", "agedb30", "tinyface")
-DATASET_CANON = {"cfp_fp": "CFP-FP", "agedb30": "AgeDB-30", "tinyface": "TinyFace"}
+DATASET_CHOICES = ("cfp_fp", "agedb30", "tinyface", "calfw")
+DATASET_CANON = {"cfp_fp": "CFP-FP", "agedb30": "AgeDB-30", "tinyface": "TinyFace", "calfw": "CALFW"}
 # 协议种类映射（卡 :620 :705：TinyFace 只许 probe-gallery Rank-1，禁止 pairwise 化）
-KIND_OF_DATASET = {"cfp_fp": "pairwise", "agedb30": "pairwise", "tinyface": "rank1"}
+KIND_OF_DATASET = {"cfp_fp": "pairwise", "agedb30": "pairwise", "tinyface": "rank1", "calfw": "pairwise"}
 METRIC_OF_KIND = {"pairwise": "acc_cv10", "rank1": "rank1"}
 
 DEFAULT_ALIGNED = {
     "cfp_fp": "datasets/cfp_aligned",
     "agedb30": "datasets/agedb30_aligned",
     "tinyface": "datasets/tinyface_112",
+    "calfw": "datasets/calfw_aligned",
 }
 DEFAULT_PROTOCOL_ROOT = "datasets/raw/cfp/cfp-dataset"
 DEFAULT_AGEDB_PAIRS = "datasets/raw/agedb30/agedb_30.txt"
@@ -411,6 +412,8 @@ def assert_official_counts(dataset, protocol, rows):
         want, tag = 7000, f"CFP-{protocol}"
     elif dataset == "agedb30":
         want, tag = 6000, "AgeDB-30"
+    elif dataset == "calfw":
+        want, tag = 6000, "CALFW"
     else:
         raise ValueError(f"{dataset} 不是 pairwise 基准")
     n = len(rows)
@@ -535,6 +538,21 @@ def rank1_accuracy(S, probe_ids, gallery_ids):
 
 # ============================ 数据与嵌入 ============================
 
+def load_calfw_pairs(pairs_txt):
+    """CALFW pairs_CALFW.txt → rows（fold 归一 0..9：same=label-1、diff=顺序300/fold）。"""
+    lines = open(pairs_txt, encoding="utf-8").read().split("\n")
+    if lines and lines[-1] == "":
+        lines = lines[:-1]
+    rows = []
+    for i in range(3000):
+        a = lines[2 * i].split(); b = lines[2 * i + 1].split()
+        rows.append({"fold": int(a[1]) - 1, "label": 1, "p1": a[0], "p2": b[0]})
+    for i in range(3000):
+        a = lines[6000 + 2 * i].split(); b = lines[6000 + 2 * i + 1].split()
+        rows.append({"fold": i // 300, "label": 0, "p1": a[0], "p2": b[0]})
+    return rows
+
+
 def load_manifest_rows(dataset, args):
     """按数据集构建/校验清单行（官方件→结构→官方口径硬校验）。"""
     if dataset == "cfp_fp":
@@ -545,6 +563,13 @@ def load_manifest_rows(dataset, args):
         resolved = [{**r, "p1": os.path.join(args.aligned_root, r["p1"]),
                      "p2": os.path.join(args.aligned_root, r["p2"])} for r in rows]
         return protocol, resolved
+    if dataset == "calfw":
+        rows = load_calfw_pairs("datasets/raw/calfw/txts/pairs_CALFW.txt")
+        validate_pairwise_rows(rows)
+        assert_official_counts(dataset, None, rows)
+        resolved = [{**r, "p1": os.path.join(args.aligned_root, r["p1"]),
+                     "p2": os.path.join(args.aligned_root, r["p2"])} for r in rows]
+        return "pairwise", resolved
     if dataset == "agedb30":
         rows = load_agedb_pairs(args.pairs_txt)
         validate_pairwise_rows(rows)
