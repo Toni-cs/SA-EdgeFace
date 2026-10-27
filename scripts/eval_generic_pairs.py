@@ -66,6 +66,32 @@ DEFAULT_AGEDB_PAIRS = "datasets/raw/agedb30/agedb_30.txt"
 MANIFEST_DIR = "datasets/eval_manifests"
 PREPROCESS_DESC = "bgr_rgb_resize112_div127.5_-1"   # 与 eval_lfw_single 逐位同口径
 
+# ---- sidecar 三钉（门三：model_sha / manifest_sha / crop_chain）----
+def _sidecar_model_sha(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for blk in iter(lambda: f.read(1 << 20), b""):
+            h.update(blk)
+    return h.hexdigest()
+
+
+def _sidecar_crop_chain(aligned_root):
+    a = str(aligned_root).replace("\\", "/").lower()
+    if "cfp_aligned_fid2" in a:
+        return "fid2"
+    if "cfp_aligned_fid1" in a or "cfp_aligned_fid" in a:
+        return "fid1"
+    if "cfp_aligned" in a:
+        return "v0"
+    if "lfw_mirror_112" in a:
+        return "lfw_mirror_v1"
+    if "calfw_aligned" in a:
+        return "calfw_v1"
+    if "agedb" in a:
+        return "agedb_v1"
+    return os.path.basename(a)
+
+
 # ---- canary（门二；自 scripts/_eval_cfp_mirror_v1.py 移植，逻辑零改）----
 def _canary_calculate_accuracy(threshold, dist, actual_issame):
     predict_issame = np.less(dist, threshold)
@@ -752,6 +778,7 @@ def main():
         aligned_root=os.path.abspath(args.aligned_root),
         manifest=os.path.abspath(csv_path), manifest_sha256=meta["manifest_sha256"],
         preprocess=PREPROCESS_DESC, device=device, canary=canary_msg,
+        model_sha=_sidecar_model_sha(model_path), crop_chain=_sidecar_crop_chain(args.aligned_root),
         date=datetime.datetime.now().isoformat(timespec="seconds"),
         script="scripts/eval_generic_pairs.py",
         **extra,
