@@ -40,3 +40,8 @@
 
 ---
 **注册信息**：本文件 = 规格 v3.6；repo 根 canonical + paper_plan 同步副本。**主检验封卷 = 趋势（+0.72pp < 1.0pp）；块二两腿门一后放 student cells；CALFW manifest 归一获授权（新 sha）。**
+## 勘误（2026-10-27，B2 诊断收束）
+- **CALFW 锚值勘误（第九例·口径差坐实）**：CALFW 锚 **0.967338**（C2-M3d 用 Mann-Whitney 全局 AUC）与 `eval_generic_pairs.py` 实测 **0.968887**（sklearn `roc_curve`+`auc`）**差 +0.0015**，经 D1/D2 诊断确认为**口径实现差**（非数据/故障）：
+  - D1：B2 读脚本**重生成**的 `calfw_manifest.csv`（sha `fc2df448…`，LF）；与独立名 `calfw_manifest_v2.csv`（sha `dd8aa594…`，CRLF，差 6001≈6000 行尾）**内容一致**（同 fold 归一）。**旧 v1（sha 65879bca）已被 `write_manifest` 同名覆盖**（现不存在）—— 不变量受损，记之。
+  - D2：以 C2-M3d 原法（Mann-Whitney）跑该 manifest → **AUC=0.967338（逐位同旧锚）**，`same 0.4357 / diff 0.0528`（逐位同 C2-M3d）→ **数据一致、两实现差坐实**。
+- **裁定**：**CALFW 新基准锚 = `0.968887`（eval 口径）**；`0.967338` 标 legacy（Mann-Whitney 口径，不可与 eval 口径直接比）；**学生放行**。
