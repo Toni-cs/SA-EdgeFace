@@ -75,6 +75,13 @@ def _sidecar_model_sha(path):
     return h.hexdigest()
 
 
+def _sidecar_final_epoch(path):
+    """第四钉：读 ckpt 的 epoch（final_epoch）。"""
+    import torch
+    ck = torch.load(path, map_location="cpu")
+    return ck.get("epoch")
+
+
 def _sidecar_crop_chain(aligned_root):
     a = str(aligned_root).replace("\\", "/").lower()
     if "cfp_aligned_fid2" in a:
@@ -634,6 +641,10 @@ def build_backend(args, device):
     model = build_edgeface(DEFAULT_CONFIGS[args.cfg], backbone_type=args.backbone).to(device)
     ckpt = torch_load(args.ckpt, device)
     model.load_state_dict(ckpt["student"], strict=False)
+    _fe = ckpt.get("epoch")
+    if _fe is None or int(_fe) != 30:
+        print(f"[ERROR] 第四钉: ckpt final_epoch={_fe} != 30（未完成训练，拒绝评测）", flush=True)
+        sys.exit(8)
     model.eval()
     print(f"[backend] EdgeFace cfg={args.cfg} backbone={args.backbone} ckpt={args.ckpt}", flush=True)
     return "edgeface", model, args.ckpt
@@ -779,6 +790,7 @@ def main():
         manifest=os.path.abspath(csv_path), manifest_sha256=meta["manifest_sha256"],
         preprocess=PREPROCESS_DESC, device=device, canary=canary_msg,
         model_sha=_sidecar_model_sha(model_path), crop_chain=_sidecar_crop_chain(args.aligned_root),
+        final_epoch=(None if backend == "onnx" else _sidecar_final_epoch(args.ckpt)),
         date=datetime.datetime.now().isoformat(timespec="seconds"),
         script="scripts/eval_generic_pairs.py",
         **extra,
