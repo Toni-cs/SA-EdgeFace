@@ -82,6 +82,26 @@ def _sidecar_final_epoch(path):
     return ck.get("epoch")
 
 
+def _sidecar_weight_health(path):
+    """第五钉：返回 (med|w|, frac(<1e-30))，阈值沿用 C2-M2 标定。"""
+    import torch
+    ck = torch.load(path, map_location="cpu")
+    sd = ck.get("student", {})
+    vals = []
+    for k, v in sd.items():
+        if torch.is_floating_point(v):
+            t = v.detach().double().flatten()
+            f = t[torch.isfinite(t)]
+            if f.numel():
+                vals.append(f.abs())
+    if not vals:
+        return 0.0, 1.0
+    a = torch.cat(vals)
+    med = float(a.median())
+    frac = float((a < 1e-30).double().mean())
+    return med, frac
+
+
 def _sidecar_crop_chain(aligned_root):
     a = str(aligned_root).replace("\\", "/").lower()
     if "cfp_aligned_fid2" in a:
@@ -645,6 +665,10 @@ def build_backend(args, device):
     if _fe is None or int(_fe) != 30:
         print(f"[ERROR] 第四钉: ckpt final_epoch={_fe} != 30（未完成训练，拒绝评测）", flush=True)
         sys.exit(8)
+    _wmed, _wfrac = _sidecar_weight_health(args.ckpt)
+    if not (_wmed >= 1e-8 and _wfrac <= 0.01):
+        print(f"[ERROR] 第五钉: med|w|={_wmed:.3e} frac<1e-30={_wfrac:.4f}（湮灭臂，拒绝评测）", flush=True)
+        sys.exit(9)
     model.eval()
     print(f"[backend] EdgeFace cfg={args.cfg} backbone={args.backbone} ckpt={args.ckpt}", flush=True)
     return "edgeface", model, args.ckpt
@@ -791,6 +815,8 @@ def main():
         preprocess=PREPROCESS_DESC, device=device, canary=canary_msg,
         model_sha=_sidecar_model_sha(model_path), crop_chain=_sidecar_crop_chain(args.aligned_root),
         final_epoch=(None if backend == "onnx" else _sidecar_final_epoch(args.ckpt)),
+        weight_med=(None if backend == "onnx" else _sidecar_weight_health(args.ckpt)[0]),
+        weight_frac=(None if backend == "onnx" else _sidecar_weight_health(args.ckpt)[1]),
         date=datetime.datetime.now().isoformat(timespec="seconds"),
         script="scripts/eval_generic_pairs.py",
         **extra,
