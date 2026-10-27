@@ -770,6 +770,10 @@ def main():
         sims = pairwise_sims(feats)
         res = evaluate_pairwise_folds(sims, [r["label"] for r in rows], [r["fold"] for r in rows])
         metric, value = METRIC_OF_KIND["pairwise"], res["acc_cv"]
+        # 第六钉（事故门：拦崩不拦弱）：功能快检 AUC<0.60 → 拒绝出数（学生臂适用）
+        if backend != "onnx" and float(res["auc"]) < 0.60:
+            print(f"[ERROR] 第六钉: 功能快检 AUC={float(res['auc']):.4f} < 0.60（崩坏臂，拒绝出数）", flush=True)
+            sys.exit(10)
         extra = {"protocol_detail": protocol, "folds": res.pop("n_folds"),
                  "acc_std": res["acc_std"], "fold_accs": res["fold_accs"],
                  "fold_thresholds": res["fold_thresholds"],
