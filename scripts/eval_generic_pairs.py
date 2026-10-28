@@ -79,14 +79,14 @@ def _sidecar_model_sha(path):
 def _sidecar_final_epoch(path):
     """第四钉：读 ckpt 的 epoch（final_epoch）。"""
     import torch
-    ck = torch.load(path, map_location="cpu")
+    ck = torch.load(path, map_location="cpu", weights_only=False)
     return ck.get("epoch")
 
 
 def _sidecar_weight_health(path):
     """第五钉：返回 (med|w|, frac(<1e-30))，阈值沿用 C2-M2 标定。"""
     import torch
-    ck = torch.load(path, map_location="cpu")
+    ck = torch.load(path, map_location="cpu", weights_only=False)
     sd = ck.get("student", {})
     vals = []
     for k, v in sd.items():

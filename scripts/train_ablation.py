@@ -387,7 +387,7 @@ def main():
 
 def _assert_health(path, epochs_expected):
     import torch
-    ck = torch.load(path, map_location="cpu")
+    ck = torch.load(path, map_location="cpu", weights_only=False)
     assert ck.get("epoch") == epochs_expected, f"{path} epoch={ck.get('epoch')} != {epochs_expected}"
     nan = sum(int(torch.isnan(v).sum()) + int(torch.isinf(v).sum())
               for v in ck["student"].values() if torch.is_floating_point(v))
