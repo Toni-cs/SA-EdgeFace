@@ -64,3 +64,6 @@ results/pairs/
 # CodeArts 索引目录（不入库）
 .codegraph
 .codeartsdoer/
+
+# 网格 cell 输出（C2-M4v2 起，内部产物不入库）
+results/G*_*.json
