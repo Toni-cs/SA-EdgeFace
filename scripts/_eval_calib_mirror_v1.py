@@ -104,7 +104,7 @@ def main():
     import torch  # noqa: E402
     use_ckpt = args.ckpt is not None
     if use_ckpt:
-        ck = torch.load(args.ckpt, map_location="cpu")
+        ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
         _fe = ck.get("epoch")
         if _fe is None or int(_fe) != 30:
             print("[ERROR] 第四钉: final_epoch=%s != 30（未完成训练）" % _fe, flush=True); sys.exit(8)
