@@ -701,7 +701,7 @@ def build_backend(args, device):
 
 def torch_load(path, device):
     import torch
-    return torch.load(path, map_location=device)
+    return torch.load(path, map_location=device, weights_only=False)
 
 
 # ============================ main ============================
