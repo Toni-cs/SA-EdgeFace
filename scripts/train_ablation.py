@@ -11,6 +11,8 @@
 """
 
 import os
+import subprocess
+import hashlib
 import sys
 import time
 import argparse
@@ -282,16 +284,23 @@ def main():
             suffix = "" if args.distill_start is None and args.w_feat is None else \
                      f"_s{args.distill_start}_l{str(args.w_feat).replace('.', '')}"
         save_name = f"cfg{orig_i}_seed{args.seed}{suffix}"
+        _cfg_sha = hashlib.sha256(repr(ABLATION_CONFIGS).encode("utf-8")).hexdigest()[:16]
+        try:
+            _commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                                     capture_output=True, text=True).stdout.strip() or "?"
+        except Exception:
+            _commit = "?"
         # V2-1 修正①：每臂把【实际生效】的参数打进日志（Phase 3.5 汇总机检 [ARM] 唯一源头；
         # 断言在训练开跑前触发，违例臂不烧 GPU）：
         if use_dt:
             print(f"[ARM] {save_name} distill_type={args.distill_type} backbone={args.backbone} "
                   f"lambda_max={args.lambda_max} alpha={args.alpha} "
                   f"rkd_d={rkd_d_eff} rkd_a={rkd_a_eff} cond={int(dt_spec['cond'])} "
-                  f"lr={args.lr} start={params['distill_start']} aug={params['use_aug']} seed={args.seed}")
+                  f"lr={args.lr} start={params['distill_start']} aug={params['use_aug']} seed={args.seed} "
+                  f"config_sha={_cfg_sha} commit={_commit}")
         else:
             print(f"[ARM] {save_name} w_feat={params['w_feat']} start={params['distill_start']} "
-                  f"aug={params['use_aug']}")
+                  f"aug={params['use_aug']} config_sha={_cfg_sha} commit={_commit}")
         assert params["w_feat"] == (args.w_feat if args.w_feat is not None else params["w_feat"]), \
             "V2-1: --w_feat 未注入 params（臂会静默跑成表值）"
         tag = f"cfg{orig_i}_{desc.replace(' ', '').replace('+', '')}"
