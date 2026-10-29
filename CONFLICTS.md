@@ -121,3 +121,9 @@
 - **第十例（生成器写点名未钉死 → 覆盖旧件）**：`eval_generic_pairs.py:write_manifest` 硬编码点名 `f"{dataset}_manifest.csv"` → CALFW 铸造时**同名覆盖**了 v1 manifest（原 sha `65879bca…`，产物 `calfw_manifest.csv` 现为 `fc2df448…`）。教训：**生成器写点名须钉死版本/加版本后缀**，否则重生成即覆盖既有注册件（不变量破坏）。考古：v1 文件本身**从未入库**（`datasets/` gitignored），`65879bca` 仅存于规格件文本引用（5 commit）；现仅凭规格文本+本台账追溯，**legacy 无 git 佐证**。
 - **第十一例（簿记语言≠git 机制）**：多批簿记写「旧件标 legacy/不入库」，但其**文件或脚本实为 gitignored**（`CONFLICTS.md`=`/CONFLICTS.md`、`_eval_calib_mirror_v1.py`=`scripts/_*`、`calfw_manifest*`=`datasets/`）→ 语言上声明「标 legacy/不入库」与机制上「被 ignore 而根本不在版本控制」**不等价**；「不入库」的**实际含义**须显式区分「tracked 但标注」vs「untracked（ignore）」。教训：簿记结论必须与 git 机制一致（`git check-ignore -v` + `ls-files` 核实后写）。
 - **今晚时序始末（2026-10-27）**：C2-M9 续批 A(LFW 铸造,门一 97.0833✓)/B(CALFW 铸造 18bee80)/E(CONFLICTS 清欠) 完成；C(16 cell) 因 **19:18 已过 18:00 GPU 截线**顺延 10-28 早；D(18:30 重训)**未跑**（seed456 final mtime 仍 10-03/10-04）→ 改 C2-M10 「0｜19:35 起跑 cfg3@456」补窗。git 仅剩 8 个 `?? results/G*_*.json`。
+
+### §C2-M10 续·第十二例 + 启动三证（10-28 晚，三证）
+- **第十二例（启动三证：pid + 日志首行 + 60s 存活）**：**Start-Process 在本沙箱不可靠**（C2-M4v3.2 与 C2-M10 均报「进程已在后台启动」但**无日志、无训练进程**）→ 改 **`nohup <python> ... > <log> 2>&1 &`** **成功脱离会话**。新纪律：**任何「脱离会话」长任务，落启动三证 = ① pid（`$!`）② 日志首行（如 `[ARM] ...`）③ ~60s 后进程存活 + 日志有内容**；三证不全 = 视为未启动、停报。
+- **本次启动三证（cfg3@456 重训，2026-10-28）**：① pid=**2124**（nohup）② 日志首行 `[ARM] cfg3_seed456 w_feat=0.0 start=0 aug=False config_sha=d13e69c2beaecac8 commit=3383bc4` ③ 60s 存活 ALIVE + `[epoch 1/30]` 落盘。日志：`logs_multiseed/cfg3_seed456_retrain_20261028.txt`。
+- **心电图（每 epoch 落盘，2026-10-28 17:49 已出 ep1-5）**：`[eval ep1] AUC=0.7064 Acc=64.13%` / ep2 0.8345/75.40 / ep3 0.8402/75.99 / ep4 0.8337/75.85 / ep5 0.8371/76.01；`[health] med|w|` = 1.761e-02→8.247e-03→3.924e-03→2.726e-03→**2.418e-03（逐 epoch 递减 ~7×，仍 >1e-8 但需警惕）**；AUC **ep2 起平台 0.83-0.84**。
+- **进程 2124 训练中（epoch 6/30 @17:49）**；`epoch≈7.7min → 30ep≈3.8h → 预计 ~20:50 完`（`--eval_every 1` 开销）。
