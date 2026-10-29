@@ -45,3 +45,6 @@
   - D1：B2 读脚本**重生成**的 `calfw_manifest.csv`（sha `fc2df448…`，LF）；与独立名 `calfw_manifest_v2.csv`（sha `dd8aa594…`，CRLF，差 6001≈6000 行尾）**内容一致**（同 fold 归一）。**旧 v1（sha 65879bca）已被 `write_manifest` 同名覆盖**（现不存在）—— 不变量受损，记之。
   - D2：以 C2-M3d 原法（Mann-Whitney）跑该 manifest → **AUC=0.967338（逐位同旧锚）**，`same 0.4357 / diff 0.0528`（逐位同 C2-M3d）→ **数据一致、两实现差坐实**。
 - **裁定**：**CALFW 新基准锚 = `0.968887`（eval 口径）**；`0.967338` 标 legacy（Mann-Whitney 口径，不可与 eval 口径直接比）；**学生放行**。
+## CALFW manifest 白名单（2026-10-30 等价验证后放行）
+- **dd8aa594…**（calfw_manifest_v2.csv，CRLF）与 **fc2df448…**（calfw_manifest.csv=write_manifest 生成，LF）**逐行内容全同（6001 行，content_diff=0）、仅行尾差** → **等价**。
+- 评测通道白名单 = **{dd8aa594, fc2df448}**；H_calfw_*.json 记实际 sha；全列同版。
