@@ -127,3 +127,6 @@
 - **本次启动三证（cfg3@456 重训，2026-10-28）**：① pid=**2124**（nohup）② 日志首行 `[ARM] cfg3_seed456 w_feat=0.0 start=0 aug=False config_sha=d13e69c2beaecac8 commit=3383bc4` ③ 60s 存活 ALIVE + `[epoch 1/30]` 落盘。日志：`logs_multiseed/cfg3_seed456_retrain_20261028.txt`。
 - **心电图（每 epoch 落盘，2026-10-28 17:49 已出 ep1-5）**：`[eval ep1] AUC=0.7064 Acc=64.13%` / ep2 0.8345/75.40 / ep3 0.8402/75.99 / ep4 0.8337/75.85 / ep5 0.8371/76.01；`[health] med|w|` = 1.761e-02→8.247e-03→3.924e-03→2.726e-03→**2.418e-03（逐 epoch 递减 ~7×，仍 >1e-8 但需警惕）**；AUC **ep2 起平台 0.83-0.84**。
 - **进程 2124 训练中（epoch 6/30 @17:49）**；`epoch≈7.7min → 30ep≈3.8h → 预计 ~20:50 完`（`--eval_every 1` 开销）。
+### §C2-M10-续-7 line-370 假警报 + cfg4@456 评测三件套（10-30，三证）
+- **第十三例（line-370 假警报致链停 ~30min）**：`train_ablation.py:370` 的 `torch.load` 缺 `weights_only=False`（PyTorch 2.6 默认改 `True`）→ cfg4@456 训练完成后崩溃退出（exit≠0，**权重已落盘不受影响**）→ 链式判断误判训练失败、停链 ~30min。修复：line 370 加 `weights_only=False`（line 390 `_assert_health` 已修，此为遗漏补修）。冒烟：`cfg4_seed456_final.pt` load OK（epoch=30, nonfinite=0, med=1.94e-3）。
+- **cfg4@456 评测三件套**：① CFP-FP acc=78.09%（≥0.60 第三钉 ✓，H_cfpfp_cfg4_seed456.json 落盘）② LFW acc=84.17%（**低于稳定带 91.42-93.32** ⚠️，H_lfw_cfg4_seed456.json 落盘）③ CALFW AUC=0.5525 < 0.60 ❌（第六钉拒出数，H 件未生成）。**异常**：旧 cfg4_final.pt med|w|=5.14e-02 vs 新 cfg4_seed456 med|w|=1.94e-03（差 25×）→ 两者训练超参不同，非简单种子重训。

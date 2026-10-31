@@ -367,7 +367,7 @@ def main():
         _assert_health(os.path.join(args.save_dir, f"{save_name}_final.pt"), args.epochs)
 
         model = build_edgeface(DEFAULT_CONFIGS[cfg_name]).to(device)
-        ckpt = torch.load(f"{args.save_dir}/{save_name}_final.pt", map_location=device)
+        ckpt = torch.load(f"{args.save_dir}/{save_name}_final.pt", map_location=device, weights_only=False)
         model.load_state_dict(ckpt["student"], strict=False)
 
         auc, acc, sep = eval_model(model, ds, device)
