@@ -147,7 +147,7 @@ class DistillTrainer:
 
         start_epoch = 0
         if resume_from and os.path.exists(resume_from):
-            ckpt = torch.load(resume_from, map_location=self.device)
+            ckpt = torch.load(resume_from, map_location=self.device, weights_only=False)
             self.student.load_state_dict(ckpt["student"])
             self.arcface.load_state_dict(ckpt["arcface"])
             if "optimizer" in ckpt:
@@ -155,6 +155,13 @@ class DistillTrainer:
             if "scheduler" in ckpt:
                 scheduler.load_state_dict(ckpt["scheduler"])
             start_epoch = ckpt.get("epoch", 0)
+            if "rng_states" in ckpt:
+                import random as _random
+                torch.set_rng_state(ckpt["rng_states"]["torch"])
+                if ckpt["rng_states"]["torch_cuda"] is not None and torch.cuda.is_available():
+                    torch.cuda.set_rng_state_all(ckpt["rng_states"]["torch_cuda"])
+                np.random.set_state(ckpt["rng_states"]["numpy"])
+                _random.setstate(ckpt["rng_states"]["python"])
             print(f"[resume] loaded {resume_from}, starting from epoch {start_epoch}")
 
         global_step = 0
@@ -241,7 +248,19 @@ class DistillTrainer:
                     print(f"  [eval warn] eval_fn failed: {e}")
                 finally:
                     self.student.train()
-            self.save(os.path.join(save_dir, f"{save_name}_ep{epoch+1}.pt"), optimizer, scheduler, epoch + 1, avg)
+            try:
+                ep_ckpt = os.path.join(save_dir, f"{save_name}_ep_latest.pt")
+                self.save(ep_ckpt, optimizer, scheduler, epoch + 1, avg)
+            except Exception as e:
+                print(f"  [ckpt warn] epoch checkpoint 写盘失败: {e}")
+            if epoch == start_epoch:
+                try:
+                    verify = torch.load(ep_ckpt, map_location=self.device, weights_only=False)
+                    assert "student" in verify and "rng_states" in verify, "checkpoint 缺关键字段"
+                    print(f"  [ckpt-verify] ep{epoch+1} 读回 OK (keys={list(verify.keys())})")
+                except Exception as e:
+                    print(f"  [ckpt-verify FAIL] {e}")
+                    raise
             ran_epochs += 1
         if ran_epochs < epochs - start_epoch:
             raise RuntimeError(f"训练在 ep{start_epoch + ran_epochs} 提前终止")
@@ -317,6 +336,13 @@ class DistillTrainer:
         if train_loss is not None:
             ckpt["train_loss"] = train_loss
         ckpt["eval_history"] = self.eval_history
+        import random as _random
+        ckpt["rng_states"] = {
+            "torch": torch.get_rng_state(),
+            "torch_cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+            "numpy": np.random.get_state(),
+            "python": _random.getstate(),
+        }
         torch.save(ckpt, path)
         return True
 

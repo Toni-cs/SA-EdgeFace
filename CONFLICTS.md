@@ -130,3 +130,7 @@
 ### §C2-M10-续-7 line-370 假警报 + cfg4@456 评测三件套（10-30，三证）
 - **第十三例（line-370 假警报致链停 ~30min）**：`train_ablation.py:370` 的 `torch.load` 缺 `weights_only=False`（PyTorch 2.6 默认改 `True`）→ cfg4@456 训练完成后崩溃退出（exit≠0，**权重已落盘不受影响**）→ 链式判断误判训练失败、停链 ~30min。修复：line 370 加 `weights_only=False`（line 390 `_assert_health` 已修，此为遗漏补修）。冒烟：`cfg4_seed456_final.pt` load OK（epoch=30, nonfinite=0, med=1.94e-3）。
 - **cfg4@456 评测三件套**：① CFP-FP acc=78.09%（≥0.60 第三钉 ✓，H_cfpfp_cfg4_seed456.json 落盘）② LFW acc=84.17%（**低于稳定带 91.42-93.32** ⚠️，H_lfw_cfg4_seed456.json 落盘）③ CALFW AUC=0.5525 < 0.60 ❌（第六钉拒出数，H 件未生成）。**异常**：旧 cfg4_final.pt med|w|=5.14e-02 vs 新 cfg4_seed456 med|w|=1.94e-03（差 25×）→ 两者训练超参不同，非简单种子重训。
+### §C2-M10-续-12 执行框交接 + epoch checkpoint 补丁（10-31，三证）
+- **10-30 13:17 后链停 19.5h**：续-7 框执行完毕后，续-9/10/11 框**未执行**（非技术原因，框未到达执行代理）→ 链停 19.5h 至 10-31 09:44 续-12 框到达。非训练崩溃、非 GPU 故障，纯执行框传递延迟。
+- **执行代理切换 DeepSeek-V4.1-Flash → GLM-5.2**：续-12 框起由 GLM-5.2 执行。通道切换无代码变更，仅执行代理不同；prereg v3.6 / ledger / CONFLICTS.md 见仓库，单框自足。
+- **epoch checkpoint 补丁**：`distill.py` save 方法加 RNG states（torch/cuda/numpy/python）；resume 逻辑恢复 RNG + `weights_only=False`；训练循环 epoch checkpoint 改为 `try` 包裹 + 固定名 `_ep_latest.pt`（只保留最新一份）+ 首 epoch 读回验证（keys 含 student+rng_states）。目的：12:50 闸停后批次 2 全状态 resume 补完（optimizer/scheduler/RNG 全恢复）。
