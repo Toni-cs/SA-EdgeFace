@@ -142,3 +142,6 @@
 - **Δ@456 落档**：LFW cfg4(84.17)−cfg0(91.67)=**-7.50pp** / CALFW cfg4 崩坏(AUC0.55)−cfg0(72.58)=**N/A** / CFP-FP cfg4(78.09)−cfg0(80.57)=**-2.48pp** → **域特异性 + 复现失败注脚**（全反向/崩坏，与旧 Δ(cfg4_final−cfg0_final)=+0.92pp@LFW 符号翻转）。
 - **异常证据注脚**：① med|w| 差 25×（旧 cfg4_final 5.14e-2 vs 新 cfg4_seed456 1.94e-3）② cfg4 loss_arc~10.78 vs cfg0 7.68（差 ~3pp）③ cfg4 LFW 84.17% 出带 [91.42,93.32] ④ cfg4 CALFW AUC 0.55 崩坏。四证共指 cfg4_seed456 重训产物异常，根因疑训练超参不一致（非种子效应）。
 - **今日臂 = cfg3@789**（等用户明日框）；今日零训练（用户明示），诊断闸仅落证据不点火。
+### §C2-M10-续-17 README + push（11-01 午）
+- **分支 iii 归因分歧**：prereg 机械口径（第三档落档 = 域特异性 + 复现失败注脚）与四证共指产物异常（med|w| 差 25× / loss_arc 差 ~3pp / LFW 出带 / CALFW 崩坏）的归因分歧，终审 11-04 用户裁。两口径并列不预判。
+- **本次 push 范围**：审计闸六项全绿（git 干净 / 无 ≥10MB 跟踪文件 / 无 raw 像素 / 无 E:\ 路径 / 775 KiB pack / 36 commits since 10-20）；结构整理 docs/+archive/ 归位；README 重写；remote=`git@github.com:Toni-cs/SA-EdgeFace.git`（SSH）。
