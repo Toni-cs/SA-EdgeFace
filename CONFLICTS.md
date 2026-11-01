@@ -136,3 +136,9 @@
 - **epoch checkpoint 补丁**：`distill.py` save 方法加 RNG states（torch/cuda/numpy/python）；resume 逻辑恢复 RNG + `weights_only=False`；训练循环 epoch checkpoint 改为 `try` 包裹 + 固定名 `_ep_latest.pt`（只保留最新一份）+ 首 epoch 读回验证（keys 含 student+rng_states）。目的：12:50 闸停后批次 2 全状态 resume 补完（optimizer/scheduler/RNG 全恢复）。
 ### §C2-M10-续-14 诊断闸 sha 证据（11-01）
 - **cfg4_seed456_final.pt sha256 = D4F11D618CA13A8E1B07BD5A015F6936B9C6CC6C99C6FD2C90FA7FA38F14E7F8**：与 B 节冻结件 sha D4F11D61 匹配 ✓。文件只读不覆盖，重训一律存新文件名。
+### §C2-M10-续-15 诊断闸分支 iii 裁决（11-01）
+- **LFW 重测**：cfg4_seed456 冻结件 × 今日管道 = **84.1667%**（std=0.9458），与原读数 84.17% **逐位一致** → 重测复现原读数。
+- **分支 iii 命中**：重测 ≈84 且 sha 同（D4F11D61 匹配）且日志收敛（末5ep 10.895→10.864 微降）→ Δ@456 照 prereg v3.6 第三档落档。
+- **Δ@456 落档**：LFW cfg4(84.17)−cfg0(91.67)=**-7.50pp** / CALFW cfg4 崩坏(AUC0.55)−cfg0(72.58)=**N/A** / CFP-FP cfg4(78.09)−cfg0(80.57)=**-2.48pp** → **域特异性 + 复现失败注脚**（全反向/崩坏，与旧 Δ(cfg4_final−cfg0_final)=+0.92pp@LFW 符号翻转）。
+- **异常证据注脚**：① med|w| 差 25×（旧 cfg4_final 5.14e-2 vs 新 cfg4_seed456 1.94e-3）② cfg4 loss_arc~10.78 vs cfg0 7.68（差 ~3pp）③ cfg4 LFW 84.17% 出带 [91.42,93.32] ④ cfg4 CALFW AUC 0.55 崩坏。四证共指 cfg4_seed456 重训产物异常，根因疑训练超参不一致（非种子效应）。
+- **今日臂 = cfg3@789**（等用户明日框）；今日零训练（用户明示），诊断闸仅落证据不点火。
