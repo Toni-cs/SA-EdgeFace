@@ -134,3 +134,5 @@
 - **10-30 13:17 后链停 19.5h**：续-7 框执行完毕后，续-9/10/11 框**未执行**（非技术原因，框未到达执行代理）→ 链停 19.5h 至 10-31 09:44 续-12 框到达。非训练崩溃、非 GPU 故障，纯执行框传递延迟。
 - **执行代理切换 DeepSeek-V4.1-Flash → GLM-5.2**：续-12 框起由 GLM-5.2 执行。通道切换无代码变更，仅执行代理不同；prereg v3.6 / ledger / CONFLICTS.md 见仓库，单框自足。
 - **epoch checkpoint 补丁**：`distill.py` save 方法加 RNG states（torch/cuda/numpy/python）；resume 逻辑恢复 RNG + `weights_only=False`；训练循环 epoch checkpoint 改为 `try` 包裹 + 固定名 `_ep_latest.pt`（只保留最新一份）+ 首 epoch 读回验证（keys 含 student+rng_states）。目的：12:50 闸停后批次 2 全状态 resume 补完（optimizer/scheduler/RNG 全恢复）。
+### §C2-M10-续-14 诊断闸 sha 证据（11-01）
+- **cfg4_seed456_final.pt sha256 = D4F11D618CA13A8E1B07BD5A015F6936B9C6CC6C99C6FD2C90FA7FA38F14E7F8**：与 B 节冻结件 sha D4F11D61 匹配 ✓。文件只读不覆盖，重训一律存新文件名。
