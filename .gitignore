@@ -42,6 +42,7 @@ paper/
 # OS
 Thumbs.db
 .DS_Store
+.tmp
 # 内部审查脚本/中间产物（永不提交）
 results/stat_*
 results/statistical_*
