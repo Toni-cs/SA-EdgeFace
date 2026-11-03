@@ -145,3 +145,8 @@
 ### §C2-M10-续-17 README + push（11-01 午）
 - **分支 iii 归因分歧**：prereg 机械口径（第三档落档 = 域特异性 + 复现失败注脚）与四证共指产物异常（med|w| 差 25× / loss_arc 差 ~3pp / LFW 出带 / CALFW 崩坏）的归因分歧，终审 11-04 用户裁。两口径并列不预判。
 - **本次 push 范围**：审计闸六项全绿（git 干净 / 无 ≥10MB 跟踪文件 / 无 raw 像素 / 无 E:\ 路径 / 775 KiB pack / 36 commits since 10-20）；结构整理 docs/+archive/ 归位；README 重写；remote=`git@github.com:Toni-cs/SA-EdgeFace.git`（SSH）。
+### §C2-M10-续-18 cfg3@789 单臂执行框（11-03，三证）
+- **cfg3@789 训练完训**：cfg3=x05_sab_full（+C1 full SAB，无蒸馏 w_feat=0.0），seed=789，epoch 30/30，avg_loss=10.77，eval AUC=0.9075 Acc=83.40%，health-ok，med|w|=1.005e-03，总时间 11159s（~3.1h）。日志 `logs_multiseed/cfg3_seed789_retrain_20261103.txt`。
+- **cfg3@789 评测三件套**：① LFW acc=83.57%（std=2.05，**出带 [91.42,93.32]** ⚠️，H_lfw_cfg3_seed789.json 落盘，sha=12f3fa1d…）② CALFW AUC=0.5517 < 0.60 ❌（**第六钉拒出数，H 件未生成**）③ CFP-FP acc=78.13%（std=2.12%，≥0.60 第三钉 ✓，H_cfpfp_cfg3_seed789.json 落盘）。
+- **SAB 臂系统性异常确认**：cfg3@789 与 cfg4@456 呈**相同异常模式**——LFW ~84% 出带（cfg3=83.57%, cfg4=84.17%）/ CALFW AUC ~0.55 崩坏（cfg3=0.5517, cfg4=0.5525）/ CFP-FP ~78%（cfg3=78.13%, cfg4=78.09%）/ med|w| ~1e-3（cfg3=1.005e-3, cfg4=1.94e-3）。而 baseline cfg0@456 正常（LFW 91.67% / CALFW 72.58% / CFP-FP 80.57%）。**两 SAB 臂共指重训产物系统性异常，非单臂偶发**。
+- **6 块对种子带**：cfg3@789 LFW 83.57% vs 种子带 [91.42, 93.32] → **出带 -7.85pp（距下界）**，与 cfg4@456 出带 -7.50pp 同向同量级。终判留 11-04。
