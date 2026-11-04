@@ -150,3 +150,13 @@
 - **cfg3@789 评测三件套**：① LFW acc=83.57%（std=2.05，**出带 [91.42,93.32]** ⚠️，H_lfw_cfg3_seed789.json 落盘，sha=12f3fa1d…）② CALFW AUC=0.5517 < 0.60 ❌（**第六钉拒出数，H 件未生成**）③ CFP-FP acc=78.13%（std=2.12%，≥0.60 第三钉 ✓，H_cfpfp_cfg3_seed789.json 落盘）。
 - **SAB 臂系统性异常确认**：cfg3@789 与 cfg4@456 呈**相同异常模式**——LFW ~84% 出带（cfg3=83.57%, cfg4=84.17%）/ CALFW AUC ~0.55 崩坏（cfg3=0.5517, cfg4=0.5525）/ CFP-FP ~78%（cfg3=78.13%, cfg4=78.09%）/ med|w| ~1e-3（cfg3=1.005e-3, cfg4=1.94e-3）。而 baseline cfg0@456 正常（LFW 91.67% / CALFW 72.58% / CFP-FP 80.57%）。**两 SAB 臂共指重训产物系统性异常，非单臂偶发**。
 - **6 块对种子带**：cfg3@789 LFW 83.57% vs 种子带 [91.42, 93.32] → **出带 -7.85pp（距下界）**，与 cfg4@456 出带 -7.50pp 同向同量级。终判留 11-04。
+### §C2-M10-续-21 轨道 B：SAB 根因收敛（11-04，CPU 只读，零代码改动）
+- **B1 commit 清单（since 10-20，40 commits）**：SAB 相关 = `5e6e525`(Sep24, attention.py 首建) + `e463d10`(Oct4, attention.py 结构大改)；train_ablation 相关 = `d3b200d`/`a5be5c4`/`224c15f`；distill 相关 = `224c15f`(epoch ckpt 补丁)；超参相关 = `5e6e525`(lr0.1/sgd/warmup2) + `e463d10`(alpha 0.1→0.01)。
+- **B2 超参 diff 表**：prereg v3.6 cfg3 超参（lr=0.1, batch=256, epochs=30, warmup=2, sgd, grad_clip=10.0, w_feat=0.0, w_rel=0.0, aug=False, distill_start=0）vs 旧周期日志首部（lr=1.00e-01, 同 batch/epochs）→ **超参逐项一致，零差异**。根因排除超参。
+- **B3 med|w| 对照表**：cfg3_final(旧,Sep30)=6.20e-2 / cfg3_seed42(旧,Oct3)=3.60e-2 / cfg3_seed456(新,Oct28)=4.30e-3 / cfg3_seed789(新,Nov3)=3.99e-3 / cfg4_final(旧,Oct1)=8.68e-2 / cfg4_seed456(新,Oct30)=4.40e-3 / **cfg0_seed456(新,baseline)=8.28e-2**。→ SAB 臂新周期 med|w| 暴跌 ~15×，baseline 不受影响。frac_dead：新周期 SAB 臂 4.00e-2（4% 权重死掉），旧周期 0-6e-3。
+- **B4 根因假设清单（按可能性排序）**：
+  - **[最高] commit `e463d10`(Oct 4 19:47) SAB forward 结构性改动**：① ECAChannelAtt/SpatialAtt 从 `x * sigmoid(y)`（乘法门控）改为 `x + x * sigmoid(y)`（残差门控）② 新增 bn_out(BN2d(1)) + ECA.bn(BN1d(1)) ③ alpha 从 `nn.Parameter(0.1)`（可训练）改为 `register_buffer(0.01)`（固定）④ detail 从 `out + alpha*detail(x)`（加性）改为 `out * (1+alpha*tanh(detail(x)))`（乘性）。证据链：e463d10 在 Oct 4 19:47 → 旧周期臂（cfg3_final Sep30 / cfg3_seed42 Oct3 / cfg4_final Oct1）用旧代码（5e6e525），新周期臂（cfg3_seed456 Oct28 / cfg3_seed789 Nov3 / cfg4_seed456 Oct30）用新代码（e463d10）→ med|w| 差 15× → LFW/CALFW 崩坏。**Δ@456 实际在比两个不同代码版本训练的模型，非纯种子效应**。
+  - **[高] alpha 从可训练改为固定**：`nn.Parameter(0.1)` → `register_buffer(0.01)` → detail 分支学习能力丧失，alpha 不再出现在 optimizer 参数中。
+  - **[中] detail 从加法改为乘法**：`out + alpha*detail(x)` → `out * (1+alpha*tanh(detail(x)))` → 训练动力学改变。
+  - **[中] 新增 BN 层**：bn_out + ECA.bn 额外归一化改变梯度流和权重分布。
+- **B6 结论**：根因收敛至 commit `e463d10` 的 SAB 结构改动（4 项子改动），**非种子效应、非超参差异**。旧周期 SAB 臂用旧代码训练（med|w|~6-9e-2, LFW 带内），新周期用新代码训练（med|w|~4e-3, LFW 出带）。baseline 无 SAB 不受影响。**只落证据不落修复；修复方案明天给用户裁**。
