@@ -164,3 +164,6 @@
 - **cfg3@42 训练完训**：seed=42，epoch 30/30，avg_loss=10.76，eval AUC=0.9118 Acc=83.85%，health-ok，med|w|=1.299e-03，总时间 9133s（~2.5h）。日志 `logs_multiseed/cfg3_seed42_retrain_20261104.txt`。
 - **cfg3@42 评测三件套**：① LFW acc=83.95%（std=1.67，**出带 [91.42,93.32]** ⚠️，H_lfw_cfg3_seed42.json 落盘）② CALFW AUC=0.5654 < 0.60 ❌（**第六钉拒出数，H 件未生成**）③ CFP-FP acc=77.81%（≥0.60 第三钉 ✓，H_cfpfp_cfg3_seed42.json 落盘）。
 - **4 块对照两行**：① LFW 83.95% vs 种子带 [91.42,93.32] → **出带 -7.47pp** ② SAB 同崩模式：LFW 83.95 / CALFW 0.5654 / CFP-FP 77.81 / loss 10.76 / med|w| 1.30e-3 → **三臂（cfg3@42 / cfg3@789 / cfg4@456）坐实系统性异常，非偶发**。三臂 LFW 均值 84.0% ± 0.2pp，CALFW 均值 0.557 ± 0.008，CFP-FP 均值 78.0% ± 0.2pp。终判材料落袋，框不预设。
+### §C2-M10-续-23 方案 R 回退落码（11-05，首次动代码）
+- **回退执行**：e463d10 涉 89 文件 → 不能 git revert → **手工回退 attention.py 4 项子改动**：① ECAChannelAtt 去残差+去 BN ② SpatialAtt 去残差+去 bn_out ③ alpha `register_buffer(0.01)`→`nn.Parameter(0.1)` ④ detail 乘性→加性。回退后 `git diff 5e6e525 -- attention.py` **零差异**（逐字节一致）。
+- **口径簿记**：prereg v3.6 附录「canonical SAB = 旧结构，e463d10 为回归已 revert」+ 本段。新产物一律加 `_fixR` 后缀，崩臂产物全部保留作证据。

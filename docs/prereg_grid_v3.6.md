@@ -48,3 +48,5 @@
 ## CALFW manifest 白名单（2026-10-30 等价验证后放行）
 - **dd8aa594…**（calfw_manifest_v2.csv，CRLF）与 **fc2df448…**（calfw_manifest.csv=write_manifest 生成，LF）**逐行内容全同（6001 行，content_diff=0）、仅行尾差** → **等价**。
 - 评测通道白名单 = **{dd8aa594, fc2df448}**；H_calfw_*.json 记实际 sha；全列同版。
+## SAB canonical 结构裁定（2026-11-05，方案 R 回退）
+- **canonical SAB = 旧结构（5e6e525）**：乘法门控 `x * sigmoid(y)` / alpha `nn.Parameter(0.1)` 可训练 / detail 加性 `out + alpha*detail(x)` / 无 bn_out。**e463d10 的 4 项子改动（残差门控/固定 alpha/乘性 detail/新增 BN）为回归，已 revert**。新产物一律加 `_fixR` 后缀。
