@@ -160,3 +160,7 @@
   - **[中] detail 从加法改为乘法**：`out + alpha*detail(x)` → `out * (1+alpha*tanh(detail(x)))` → 训练动力学改变。
   - **[中] 新增 BN 层**：bn_out + ECA.bn 额外归一化改变梯度流和权重分布。
 - **B6 结论**：根因收敛至 commit `e463d10` 的 SAB 结构改动（4 项子改动），**非种子效应、非超参差异**。旧周期 SAB 臂用旧代码训练（med|w|~6-9e-2, LFW 带内），新周期用新代码训练（med|w|~4e-3, LFW 出带）。baseline 无 SAB 不受影响。**只落证据不落修复；修复方案明天给用户裁**。
+### §C2-M10-续-21 轨道 A：cfg3@42 补臂完训 + 三件套（11-04，三证）
+- **cfg3@42 训练完训**：seed=42，epoch 30/30，avg_loss=10.76，eval AUC=0.9118 Acc=83.85%，health-ok，med|w|=1.299e-03，总时间 9133s（~2.5h）。日志 `logs_multiseed/cfg3_seed42_retrain_20261104.txt`。
+- **cfg3@42 评测三件套**：① LFW acc=83.95%（std=1.67，**出带 [91.42,93.32]** ⚠️，H_lfw_cfg3_seed42.json 落盘）② CALFW AUC=0.5654 < 0.60 ❌（**第六钉拒出数，H 件未生成**）③ CFP-FP acc=77.81%（≥0.60 第三钉 ✓，H_cfpfp_cfg3_seed42.json 落盘）。
+- **4 块对照两行**：① LFW 83.95% vs 种子带 [91.42,93.32] → **出带 -7.47pp** ② SAB 同崩模式：LFW 83.95 / CALFW 0.5654 / CFP-FP 77.81 / loss 10.76 / med|w| 1.30e-3 → **三臂（cfg3@42 / cfg3@789 / cfg4@456）坐实系统性异常，非偶发**。三臂 LFW 均值 84.0% ± 0.2pp，CALFW 均值 0.557 ± 0.008，CFP-FP 均值 78.0% ± 0.2pp。终判材料落袋，框不预设。
