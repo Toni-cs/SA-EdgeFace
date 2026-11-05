@@ -167,3 +167,10 @@
 ### §C2-M10-续-23 方案 R 回退落码（11-05，首次动代码）
 - **回退执行**：e463d10 涉 89 文件 → 不能 git revert → **手工回退 attention.py 4 项子改动**：① ECAChannelAtt 去残差+去 BN ② SpatialAtt 去残差+去 bn_out ③ alpha `register_buffer(0.01)`→`nn.Parameter(0.1)` ④ detail 乘性→加性。回退后 `git diff 5e6e525 -- attention.py` **零差异**（逐字节一致）。
 - **口径簿记**：prereg v3.6 附录「canonical SAB = 旧结构，e463d10 为回归已 revert」+ 本段。新产物一律加 `_fixR` 后缀，崩臂产物全部保留作证据。
+### §C2-M10-续-24 R 失败判别诊断（11-05 晚，纯判别零重训零修复）
+- **R 失败四行未回带**：fixR cfg4@456 三件套 = LFW 83.30%（出带 -8.12pp）/ CALFW AUC=0.5444 ❌ / CFP-FP 77.46%（-3.14pp）/ med|w|=4.06e-4（差 ~100×）。与崩臂（84.17%/0.5525/78.09%/4.40e-3）几乎相同甚至略差。**方案 R 回退 attention.py 无效**。
+- **续-22 预审漏报涉事文件**：P2 清单报「attention.py(19行) / distill.py(14行) / losses.py(1行) / train_ablation.py(44行) / lfw_eval.py(80行)」共 5 文件，但实际 e463d10 涉 **89 文件**。续-22 P4 方案 R 仅回退 attention.py 1 文件，漏回退 distill.py/losses.py/train_ablation.py。
+- **D3 med|w| 标志物校准**：cfg0_seed456(baseline)=8.28e-2 / cfg4_final(旧)=8.68e-2 → 均 ≥1e-2，**标志物有效，SAB 特有权重压制确认**。
+- **D1 窗口盲区补扫**：10-01~10-20 共 48 commits，核心代码改动 7 个（e463d10 + 089f723 + e63cab0 + 6d5e868 + 99d94c5 + 4a94a96 + 76ca377）。旧 cfg4_final 时间戳 Oct 1 10:39，对应期 HEAD=5e6e525。
+- **D5 e463d10 完整判别实验**：5e6e525 worktree cfg4 2ep → epoch 1 avg_loss=17.69, epoch 2 avg_loss=11.87, **nan_skipped=50**, med|w|=**NaN**。5e6e525 版本在当前环境训练不稳定（权重含 NaN）。**判定 = inconclusive**：5e6e525 有 NaN 问题，e463d10 可能修复了 NaN 但引入了 SAB 权重压制。根因可能在环境差异（PyTorch/CUDA）或 5e6e525 本身。
+- **两分支供用户裁**：① R2 全回退重训（回退 e463d10 全部 3 文件至 5e6e525）→ 但 5e6e525 有 NaN 风险 ② 二分定位继续（在 5e6e525~e463d10 间二分，或 e463d10 4 项子改动逐个回退）③ 转方案 F 前向修。
